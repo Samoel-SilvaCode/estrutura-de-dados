@@ -477,8 +477,8 @@ input[type=range]{accent-color:var(--or);width:120px}
     </article>
     <article class="howto-card">
       <h3>🪪 Identificação do jogador</h3>
-      <p>Antes de jogar, informe seu nome e sua matrícula. O jogo usa as <strong>3 primeiras letras do nome</strong> e os <strong>3 últimos números da matrícula</strong> para formar sua identificação no ranking.</p>
-      <p><strong>Exemplo:</strong> Samoel + matrícula 123456 = <strong>SAM-456</strong>.</p>
+      <p>Antes de jogar, informe somente as <strong>3 primeiras letras do seu nome</strong> e os <strong>3 últimos dígitos da matrícula</strong>. Não digite o nome completo nem a matrícula inteira.</p>
+      <p><strong>Exemplo:</strong> <strong>SAM</strong> + <strong>456</strong> = <strong>SAM-456</strong>.</p>
     </article>
     <article class="howto-card">
       <h3>🏆 Fases e ranking</h3>
@@ -573,7 +573,7 @@ input[type=range]{accent-color:var(--or);width:120px}
 </div>
 <div class="toast" id="toast" role="status"></div>
 
-<script src="frontend_api.js"></script>
+
 
 <script>
 
@@ -818,21 +818,49 @@ $("#snd").onclick=()=>{S.snd=!S.snd;save();upSnd()};const upSnd=()=>$("#snd").te
 
 function openPlayerModal(onConfirm){
   const b=$("#panelBox"),old=S.player||{};
-  const oldName=(old.firstRaw||old.fullName||"").split(/\s+/)[0];
+
+  // O identificador aceita A-Z; letras acentuadas são convertidas para a letra base.
+  const onlyThreeLetters=value=>String(value??"")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^A-Za-z]/g,"")
+    .slice(0,3)
+    .toUpperCase();
+
+  // Ao reabrir o cadastro, aproveita apenas os três caracteres de cada campo.
+  const oldName=onlyThreeLetters(old.firstRaw||old.fullName||"");
+  const oldDigits=String(old.matricula||"")
+    .replace(/\D/g,"")
+    .slice(-3);
   const safeName=escapeHtml(oldName);
-  const safeMatricula=escapeHtml(old.matricula||"");
+  const safeMatricula=escapeHtml(oldDigits);
 
   b.innerHTML=`<h2>Identificação do jogador</h2>
-    <p class="sc">Sua identificação no ranking será formada pelas 3 primeiras letras do nome e pelos 3 últimos números da matrícula.</p>
+    <p class="sc">Digite somente 3 letras do nome e os 3 últimos dígitos da matrícula.</p>
     <form class="player-form" id="playerForm">
-      <label for="pFirstName">Nome</label>
-      <input id="pFirstName" type="text" placeholder="Ex: Samoel" value="${safeName}" autocomplete="given-name" required>
-      <label for="pMatricula">Matrícula</label>
-      <input id="pMatricula" type="text" inputmode="numeric" placeholder="Ex: 123456" value="${safeMatricula}" required>
-      <p class="form-help">Exemplo: Samoel + matrícula 123456 = SAM-456.</p>
+      <label for="pFirstName">3 primeiras letras do nome</label>
+      <input id="pFirstName" type="text" placeholder="Ex: SAM" value="${safeName}" maxlength="3" minlength="3" pattern="[A-Za-z]{3}" autocapitalize="characters" autocomplete="off" spellcheck="false" required>
+      <label for="pMatricula">3 últimos dígitos da matrícula</label>
+      <input id="pMatricula" type="text" inputmode="numeric" placeholder="Ex: 456" value="${safeMatricula}" maxlength="3" minlength="3" pattern="[0-9]{3}" autocomplete="off" required>
+      <p class="form-help">Exemplo: <strong>SAM</strong> + <strong>456</strong> = <strong>SAM-456</strong>.</p>
       <p class="form-error" id="playerError" aria-live="polite"></p>
       <div class="row"><button class="btn ghost" type="button" id="playerCancel">Cancelar</button><button class="btn" type="submit">Continuar</button></div>
     </form>`;
+
+  const nameInput=$("#pFirstName");
+  const matriculaInput=$("#pMatricula");
+
+  // Impede letras extras, números, espaços e símbolos no campo do nome.
+  nameInput.addEventListener("input",()=>{
+    nameInput.value=onlyThreeLetters(nameInput.value);
+  });
+
+  // Aceita somente os três últimos dígitos que o jogador informar.
+  matriculaInput.addEventListener("input",()=>{
+    matriculaInput.value=matriculaInput.value
+      .replace(/\D/g,"")
+      .slice(0,3);
+  });
 
   $("#panel").classList.add("on");
   $("#playerCancel").onclick=()=>$("#panel").classList.remove("on");
@@ -840,17 +868,11 @@ function openPlayerModal(onConfirm){
   $("#playerForm").onsubmit=e=>{
     e.preventDefault();
 
-    const nameRaw=$("#pFirstName").value.trim();
-    const matriculaRaw=$("#pMatricula").value.trim();
-    const nameLetters=nameRaw
-      .replace(/[^A-Za-zÀ-ÿ]/g,"")
-      .slice(0,3)
-      .toLocaleUpperCase("pt-BR");
-    const digits=matriculaRaw.replace(/\D/g,"");
-    const lastDigits=digits.slice(-3);
+    const nameLetters=onlyThreeLetters(nameInput.value.trim());
+    const lastDigits=matriculaInput.value.trim().replace(/\D/g,"").slice(0,3);
 
     if(nameLetters.length!==3 || lastDigits.length!==3){
-      $("#playerError").textContent="Informe um nome com pelo menos 3 letras e uma matrícula com pelo menos 3 números.";
+      $("#playerError").textContent="Digite exatamente 3 letras e 3 números. Exemplo: SAM e 456.";
       return;
     }
 
@@ -858,8 +880,8 @@ function openPlayerModal(onConfirm){
     const identifier=nameLetters+"-"+lastDigits;
 
     S.player={
-      firstRaw:nameRaw,
-      matricula:matriculaRaw,
+      firstRaw:nameLetters,
+      matricula:lastDigits,
       key,
       identifier
     };
