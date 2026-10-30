@@ -125,7 +125,7 @@ h2{font-size:1.8rem;margin:6px 0 14px}
 
 .bar{height:12px;border-radius:9px;background:var(--bg);margin:10px 4px 0;overflow:hidden;border:2px solid var(--line)}
 
-.bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--or),#ffb347);transform-origin:left;transition:*background* .3s}
+.bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--or),#ffb347);transform-origin:left;transition:background .3s}
 
 .bar.low i{background:#e5383b}
 
@@ -573,6 +573,8 @@ input[type=range]{accent-color:var(--or);width:120px}
 </div>
 <div class="toast" id="toast" role="status"></div>
 
+
+
 <script src="./frontend_api.js"></script>
 
 <script>
@@ -679,7 +681,7 @@ const ACH = [
 
 const $=s=>document.querySelector(s);
 
-let S={un:1,stars:[],stk:[],ach:[],tot:0,snd:true,lost:false,mus:true,pu:0,wins:0,players:{},player:null,ranking:[],playedStages:[]};
+let S={un:1,stars:[],stk:[],ach:[],tot:0,snd:true,lost:false,mus:true,pu:0,wins:0,players:{},player:null,ranking:[],playedStages:[],pendingPhaseResults:[]};
 
 try{const r=localStorage.getItem("caixinha");if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
 
@@ -689,6 +691,7 @@ S.ranking=Array.isArray(S.ranking)?S.ranking:[];
 S.ranking=Array.isArray(S.ranking)?S.ranking:[];
 
 S.playedStages=Array.isArray(S.playedStages)?S.playedStages:[];
+S.pendingPhaseResults=Array.isArray(S.pendingPhaseResults)?S.pendingPhaseResults:[];
 
 S.player=S.player&&typeof S.player==="object"?S.player:null;
 
@@ -716,7 +719,140 @@ const progress=()=>{
   return p;
 };
 
+// Integração com a API: cadastro, progresso, poderes, resultados e ranking global.
+function getApi(){
+  return window.ContadinhoAPI || null;
+}
 
+function applyServerProgress(data){
+  if(!S.player || !data) return;
+
+  const p=progress();
+  const completed=Array.isArray(data.completed_phases)?data.completed_phases:[];
+  const results=Array.isArray(data.results)?data.results:[];
+
+  // O servidor é a fonte dos resultados compartilhados. Mantemos estrelas,
+  // álbum e conquistas locais, que ainda não fazem parte do banco.
+  results.forEach(row=>{
+    const index=Number(row.phase)-1;
+    if(!Number.isInteger(index)||index<0||index>=LV.length)return;
+    p.completed[index]=true;
+    p.won[index]=Boolean(row.won);
+    if(index===0)p.playedStages[0]=true;
+  });
+
+  completed.forEach(phase=>{
+    const index=Number(phase)-1;
+    if(Number.isInteger(index)&&index>=0&&index<LV.length)p.completed[index]=true;
+  });
+
+  p.usedPowers=Array.isArray(data.used_powers)?[...new Set(data.used_powers)]:p.usedPowers;
+  const next=Number(data.next_phase)||1;
+  p.un=Math.max(Number(p.un)||1,Math.min(LV.length,next));
+  if(p.completed[0])p.playedStages[0]=true;
+  if(p.playedStages[0])S.playedStages[0]=true;
+  save();
+}
+
+function apiErrorText(error){
+  return error?.message || "Não foi possível comunicar com o servidor.";
+}
+
+async function migrateLocalResults(identifier){
+  // Migra os resultados antigos deste jogador que ainda estão no localStorage.
+  // As fases locais usam índices 0..6; a API usa 1..7.
+  const api=getApi();
+  if(!api||!S.player)return;
+  const key=identifier.replace("-","_");
+  const legacy=(Array.isArray(S.ranking)?S.ranking:[])
+    .filter(row=>row && (row.identifier===identifier || row.key===key))
+    .sort((a,b)=>Number(a.phase)-Number(b.phase));
+
+  for(const row of legacy){
+    const phaseIndex=Number(row.phase);
+    if(!Number.isInteger(phaseIndex)||phaseIndex<0||phaseIndex>=LV.length)continue;
+    try{
+      await api.finishPhase(identifier,phaseIndex+1,{
+        score:Math.max(0,Math.round(Number(row.score)||0)),
+        elapsed_seconds:Math.max(1,Math.round(Number(row.seconds)||1)),
+        moves:Math.max(0,Math.round(Number(row.moves)||0)),
+        won:row.won!==false
+      });
+    }catch(error){
+      // 409 por fase já existente é esperado: ela já está no banco.
+      if(error.status===409 && /já foi encerrada|já foi registrada|already/i.test(apiErrorText(error)))continue;
+      // A API exige fases em sequência. Não tenta enviar fases posteriores
+      // enquanto houver uma fase anterior ausente.
+      console.warn("Migração de resultado local interrompida:",error);
+      break;
+    }
+  }
+}
+
+async function flushPendingPhaseResults(){
+  const api=getApi();
+  const identifier=S.player?.identifier;
+  if(!api||!identifier||!Array.isArray(S.pendingPhaseResults))return;
+
+  const pending=S.pendingPhaseResults
+    .filter(row=>row && row.identifier===identifier)
+    .sort((a,b)=>Number(a.phase)-Number(b.phase));
+
+  for(const row of pending){
+    try{
+      await api.finishPhase(identifier,Number(row.phase),{
+        score:Math.max(0,Math.round(Number(row.score)||0)),
+        elapsed_seconds:Math.max(1,Math.round(Number(row.elapsed_seconds)||1)),
+        moves:Math.max(0,Math.round(Number(row.moves)||0)),
+        won:Boolean(row.won)
+      });
+    }catch(error){
+      // Se a fase já existe no servidor, removemos a cópia pendente.
+      if(!(error.status===409 && /já foi encerrada|já foi registrada|already/i.test(apiErrorText(error)))){
+        console.warn("Resultado aguardando sincronização:",error);
+        toast("⚠️ Resultado mantido neste navegador. Será reenviado quando a API estiver disponível.");
+        break;
+      }
+    }
+
+    S.pendingPhaseResults=S.pendingPhaseResults.filter(item=>
+      !(item.identifier===row.identifier && Number(item.phase)===Number(row.phase))
+    );
+    save();
+  }
+}
+
+function queuePhaseResult(phaseIndex,score,elapsedSeconds,moves,won){
+  const identifier=S.player?.identifier;
+  if(!identifier)return;
+  const phase=phaseIndex+1;
+  const item={
+    identifier,
+    phase,
+    score:Math.max(0,Math.round(Number(score)||0)),
+    elapsed_seconds:Math.max(1,Math.round(Number(elapsedSeconds)||1)),
+    moves:Math.max(0,Math.round(Number(moves)||0)),
+    won:Boolean(won)
+  };
+
+  S.pendingPhaseResults=S.pendingPhaseResults.filter(row=>
+    !(row.identifier===identifier && Number(row.phase)===phase)
+  );
+  S.pendingPhaseResults.push(item);
+  save();
+  flushPendingPhaseResults().catch(error=>console.warn("Falha ao sincronizar resultado:",error));
+}
+
+async function refreshCurrentPlayerFromApi(){
+  const api=getApi();
+  const identifier=S.player?.identifier;
+  if(!api||!identifier)return;
+  await api.registerPlayer(identifier);
+  await migrateLocalResults(identifier);
+  await flushPendingPhaseResults();
+  const data=await api.getProgress(identifier);
+  applyServerProgress(data);
+}
 
 const isStageBlocked=i=>{
 
@@ -865,39 +1001,70 @@ function openPlayerModal(onConfirm){
   $("#panel").classList.add("on");
   $("#playerCancel").onclick=()=>$("#panel").classList.remove("on");
 
-  $("#playerForm").onsubmit=e=>{
+  $("#playerForm").onsubmit=async e=>{
     e.preventDefault();
 
     const nameLetters=onlyThreeLetters(nameInput.value.trim());
     const lastDigits=matriculaInput.value.trim().replace(/\D/g,"").slice(0,3);
+    const errorBox=$("#playerError");
+    const submitButton=$("#playerForm button[type=submit]");
 
     if(nameLetters.length!==3 || lastDigits.length!==3){
-      $("#playerError").textContent="Digite exatamente 3 letras e 3 números. Exemplo: SAM e 456.";
+      errorBox.textContent="Digite exatamente 3 letras e 3 números. Exemplo: SAM e 456.";
       return;
     }
 
     const key=nameLetters+"_"+lastDigits;
     const identifier=nameLetters+"-"+lastDigits;
+    const api=getApi();
+    if(!api){
+      errorBox.textContent="O arquivo frontend_api.js não foi carregado. Confira se ele está na mesma pasta do index.html.";
+      return;
+    }
 
-    S.player={
-      firstRaw:nameLetters,
-      matricula:lastDigits,
-      key,
-      identifier
-    };
-
+    const previousPlayer=S.player;
+    S.player={firstRaw:nameLetters,matricula:lastDigits,key,identifier};
     if(!S.players[key]){
       S.players[key]={un:1,stars:[],completed:[],won:[],playedStages:[],usedPowers:[]};
     }
 
-    save();
-    $("#panel").classList.remove("on");
-    if(onConfirm)onConfirm();
+    submitButton.disabled=true;
+    submitButton.textContent="Conectando...";
+    errorBox.textContent="Registrando jogador e buscando progresso...";
+
+    try{
+      const data=await api.registerPlayer(identifier);
+      // Envia ao banco resultados antigos que estavam guardados neste navegador.
+      await migrateLocalResults(identifier);
+      const freshData=await api.getProgress(identifier);
+      applyServerProgress(freshData||data);
+      await flushPendingPhaseResults();
+      save();
+      $("#panel").classList.remove("on");
+      if(onConfirm)onConfirm();
+    }catch(error){
+      S.player=previousPlayer;
+      errorBox.textContent="Não foi possível conectar à API: "+apiErrorText(error)+". Confira o serviço no Render e a configuração de CORS.";
+      console.error("Erro ao registrar/consultar jogador:",error);
+    }finally{
+      submitButton.disabled=false;
+      submitButton.textContent="Continuar";
+    }
   };
 }
 
 
-function requestLevel(i){
+async function requestLevel(i){
+
+  // Atualiza bloqueios, fases e poderes antes de permitir iniciar uma fase.
+  if(S.player?.identifier){
+    try{
+      await refreshCurrentPlayerFromApi();
+    }catch(error){
+      toast("⚠️ Não foi possível validar o progresso online: "+apiErrorText(error));
+      return;
+    }
+  }
 
   if(isStageBlocked(i)){
 
@@ -1061,26 +1228,9 @@ function openPanel(k){
       return `<button type="button" class="album-item ${unlocked?"unlocked":"lock"}" data-album-index="${i}" ${unlocked?"":"disabled"} aria-label="${unlocked?"Ampliar adesivo "+(NAMES[i]||("Adesivo "+(i+1))):"Adesivo bloqueado"}">${img(i)}${unlocked?"":"<span class=\"album-lock\" aria-hidden=\"true\">🔒</span>"}</button>`;
     }).join("")}</div>`;
   } else if(k==="ranking"){
-    const ranking=getGeneralRanking().slice(0,20);
     h=`<h2>🏆 Ranking geral da empresa</h2>
-      <p class="sc">Soma dos pontos registrados em cada fase. Fases encerradas pelo tempo podem somar os pontos dos pares encontrados, mas não recebem bônus de tempo. Em caso de empate, vence quem acumulou o menor tempo.</p>`;
-
-    if(ranking.length){
-      h+=`<ol class="ranking-list">${ranking.map((r,idx)=>`
-        <li>
-          <div>
-            <span class="ranking-pos">${idx+1}º</span>
-            <b>${escapeHtml(r.identifier)}</b>
-            <small>${r.completedStages} de ${LV.length} fases concluídas</small>
-          </div>
-          <div>
-            <span class="ranking-time">${r.totalScore} pts</span>
-            <small>${formatTime(r.totalSeconds)} acumulados</small>
-          </div>
-        </li>`).join("")}</ol>`;
-    } else {
-      h+=`<p class="ranking-empty">Ainda não existem resultados no ranking. Conclua uma fase para aparecer aqui!</p>`;
-    }
+      <p class="sc">Ranking compartilhado entre todos os jogadores. A classificação considera os pontos acumulados e, em caso de empate, o menor tempo.</p>
+      <p class="ranking-empty" id="globalRankingStatus">Carregando ranking online...</p>`;
   } else {
     h=`<h2>Conquistas</h2><p class="sc">${S.ach.length} de ${ACH.length}</p><ul class="ach">${ACH.map(a=>`<li class="${S.ach.includes(a[0])?"got":""}"><span>${a[1]}</span><div><b>${a[2]}</b><small>${a[3]}</small></div></li>`).join("")}</ul>`;
   }
@@ -1091,9 +1241,50 @@ function openPanel(k){
       button.addEventListener("click",()=>openAlbumImage(Number(button.dataset.albumIndex)));
     });
   }
+  b.dataset.panel=k;
   $("#panel").classList.add("on");
   $("#pClose").focus();
-  $("#pClose").onclick=()=>$("#panel").classList.remove("on");
+  $("#pClose").onclick=()=>{
+    b.dataset.panel="";
+    $("#panel").classList.remove("on");
+  };
+  if(k==="ranking")loadGlobalRanking();
+} 
+
+async function loadGlobalRanking(){
+  const box=$("#panelBox");
+  if(box.dataset.panel!=="ranking")return;
+  const status=$("#globalRankingStatus");
+  try{
+    if(!getApi())throw new Error("frontend_api.js não foi carregado.");
+    await flushPendingPhaseResults();
+    const response=await getApi().getRanking();
+    if(box.dataset.panel!=="ranking")return;
+    const rows=Array.isArray(response.ranking)?response.ranking:[];
+    let content=`<h2>🏆 Ranking geral da empresa</h2>
+      <p class="sc">Ranking compartilhado entre todos os jogadores. A classificação considera os pontos acumulados e, em caso de empate, o menor tempo.</p>`;
+    if(rows.length){
+      content+=`<ol class="ranking-list">${rows.slice(0,20).map((row,index)=>`
+        <li>
+          <div>
+            <span class="ranking-pos">${index+1}º</span>
+            <b>${escapeHtml(row.identifier)}</b>
+            <small>${Number(row.phases_won)||0} de ${LV.length} fases concluídas</small>
+          </div>
+          <div>
+            <span class="ranking-time">${Number(row.total_score)||0} pts</span>
+            <small>${formatTime(Number(row.total_seconds)||0)} acumulados</small>
+          </div>
+        </li>`).join("")}</ol>`;
+    }else{
+      content+=`<p class="ranking-empty">Ainda não existem resultados no ranking. Conclua uma fase para aparecer aqui!</p>`;
+    }
+    box.innerHTML=content+`<button class="btn" id="pClose">Fechar</button>`;
+    $("#pClose").onclick=()=>{box.dataset.panel="";$("#panel").classList.remove("on")};
+  }catch(error){
+    console.error("Erro ao carregar ranking global:",error);
+    if(status)status.textContent="Não foi possível carregar o ranking online: "+apiErrorText(error);
+  }
 }
 
 
@@ -1446,7 +1637,7 @@ function bagunca(){const g=G;if(!g||g.lock)return;const e=[...$("#board").childr
 
 
 
-function power(k){
+async function power(k){
   const g=G;
   if(!g||g.lock||!g.pu[k])return;
   const p=progress();
@@ -1456,6 +1647,29 @@ function power(k){
     toast("🧰 Este poder já foi utilizado nesta campanha.");
     return;
   }
+
+  // Confirma o consumo no servidor para impedir reutilização em outro navegador.
+  if(!S.player?.identifier||!getApi()){
+    toast("⚠️ Não foi possível validar o poder no servidor.");
+    return;
+  }
+  g.lock=true;
+  try{
+    await getApi().usePower(S.player.identifier,k);
+  }catch(error){
+    g.lock=false;
+    if(error.status===409){
+      if(!p.usedPowers.includes(k))p.usedPowers.push(k);
+      g.pu[k]=0;
+      save();pw();
+      toast("🧰 Este poder já foi utilizado nesta campanha.");
+    }else{
+      toast("⚠️ Não foi possível registrar o poder: "+apiErrorText(error));
+      console.error("Erro ao registrar poder:",error);
+    }
+    return;
+  }
+  g.lock=false;
   p.usedPowers.push(k);
   g.pu[k]=0;
   g.used++;
@@ -1559,6 +1773,7 @@ function win(){
     if(oldIndex<0)S.ranking.push(record);
 
     else if(total > S.ranking[oldIndex].score) S.ranking[oldIndex]=record;
+    queuePhaseResult(g.i,total,elapsed,g.moves,true);
 
   }
 
@@ -1620,6 +1835,7 @@ function lose(){
     const oldIndex=S.ranking.findIndex(r=>r.key===record.key&&r.phase===record.phase);
     if(oldIndex<0)S.ranking.push(record);
     else S.ranking[oldIndex]=record;
+    queuePhaseResult(g.i,g.score,elapsed,g.moves,false);
   }
 
   award("advance");
@@ -1700,6 +1916,13 @@ addEventListener("pointerdown",()=>{
 document.addEventListener("visibilitychange",()=>{if(document.hidden)bgm.pause();else if(S.mus)bgm.play().catch(()=>{})});
 
 addEventListener("resize",fit);addEventListener("orientationchange",()=>setTimeout(fit,200));
+
+// Atualiza o progresso salvo no servidor ao abrir o jogo.
+if(S.player?.identifier && getApi()){
+  refreshCurrentPlayerFromApi().catch(error=>{
+    console.warn("Não foi possível atualizar o progresso online:",error);
+  });
+}
 
 </script>
 
