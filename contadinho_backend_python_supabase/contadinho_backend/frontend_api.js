@@ -8,7 +8,7 @@
   Este arquivo contém somente a URL pública da API. Nunca coloque aqui
   SUPABASE_SECRET_KEY ou service_role.
 */
-const API_BASE_URL = "https://SUA-API.onrender.com";
+const API_BASE_URL = "https://estrutura-de-dados-1.onrender.com";
 
 async function apiRequest(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
