@@ -1,430 +1,1686 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
 <meta charset="utf-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
 <title>Contadinho e a Missão Inventário</title>
-<!-- FAVICON usando a sua imagem -->
+
 <link rel="icon" type="image/jpeg" href="img1.jpeg">
+
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap">
+
 <style>
+
 :root{--bg:#e8f0ff;--ink:#0f2559;--navy:#14307a;--or:#f7861e;--card:#fff;--muted:#46598d;--line:#c9d7f5;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1330;--ink:#eaf0ff;--card:#15244f;--muted:#9db0de;--line:#2a3d78;color-scheme:dark}}
+
 :root[data-theme="dark"]{--bg:#0a1330;--ink:#eaf0ff;--card:#15244f;--muted:#9db0de;--line:#2a3d78;color-scheme:dark}
+
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
+
 *{box-sizing:border-box}
+
 body{margin:0;min-height:100vh;font-family:"Baloo 2",system-ui,sans-serif;font-weight:500;background:var(--bg);color:var(--ink);background-image:radial-gradient(60rem 30rem at 50% -10%,var(--glow,rgba(247,134,30,.22)),transparent 70%);overflow-x:hidden}
+
 button{font:inherit;color:inherit;cursor:pointer}
+
 button:focus-visible{outline:3px solid var(--or);outline-offset:3px}
+
 .screen{display:none;max-width:980px;margin:0 auto;padding:18px 16px 40px}
+
 .screen.on{display:block}
+
 .btn{border:0;border-radius:16px;padding:10px 22px;font-weight:800;font-size:1.1rem;background:var(--or);color:#fff;box-shadow:0 5px 0 #b95d08;transition:transform .08s,box-shadow .08s}
+
 .btn:active{transform:translateY(4px);box-shadow:0 1px 0 #b95d08}
+
 .btn.alt{background:var(--navy);box-shadow:0 5px 0 #08183f}
+
 .btn.ghost{background:transparent;color:var(--ink);box-shadow:none;border:2px solid var(--line)}
+
 .btn:disabled{opacity:.45;pointer-events:none}
+
 /* home */
+
 #home{text-align:center;padding-top:28px}
+
 #home h1{font-size:clamp(2.2rem,8vw,4.2rem);line-height:1;margin:6px 0 4px;color:var(--navy)}
+
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #home h1{color:#fff}}
+
 #home h1 b{display:inline-block;background:var(--or);color:#fff;padding:0 .25em;border-radius:.2em;transform:rotate(-2deg)}
+
 #home p{color:var(--muted);font-size:1.15rem;margin:0 auto 18px;max-width:34ch}
+
 .hero{width:min(300px,70vw);filter:drop-shadow(0 12px 14px rgba(15,37,89,.3));animation:bob 2.4s ease-in-out infinite;border-radius:20px}
+
 @keyframes bob{50%{transform:translateY(-10px) rotate(2deg)}}
+
 .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+
 /* map */
+
 h2{font-size:1.8rem;margin:6px 0 14px}
+
 .lvls{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+
 .lv{position:relative;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:14px;min-height:112px}
+
 .lv:not(:disabled):hover{border-color:var(--or)}
+
 .lv:disabled{opacity:.5}
+
 .lv small{color:var(--muted);display:block}
+
 .lv strong{font-size:1.2rem;line-height:1.1;display:block;margin:2px 0 6px}
+
 .lv .st{font-size:1.25rem;letter-spacing:2px;color:var(--or)}
+
 .lv img{position:absolute;right:8px;top:8px;width:54px;border-radius:8px}
+
 /* story */
+
 .stage{background:var(--card);border:2px solid var(--line);border-radius:28px;padding:22px 18px;text-align:center;max-width:620px;margin:20px auto 0}
+
 .stage .tag{color:var(--or);font-weight:800}
+
 .stage h2{margin:2px 0 8px;color:var(--navy)}
+
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .stage h2{color:#fff}}
-.stage img{width:min(240px,60vw);animation:pop .5s;border-radius:20px}
+
+.stage > img{display:block;width:min(170px,42vw);height:clamp(105px,18vh,150px);max-width:100%;object-fit:contain;animation:pop .5s;border-radius:16px;margin:8px auto 12px}
+
 .say{font-size:1.25rem;min-height:5.2em;max-width:44ch;margin:8px auto 14px;line-height:1.3}
+
 @keyframes pop{0%{transform:scale(.6) rotate(-6deg);opacity:0}70%{transform:scale(1.08)}100%{transform:none;opacity:1}}
+
 /* hud */
+
 .hud{display:flex;align-items:center;gap:12px;background:var(--card);border:2px solid var(--line);border-radius:22px;padding:8px 14px 8px 8px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+
 .mas {width: 92px;height: 72px;flex: none;display: flex;align-items: center;justify-content: center;overflow: hidden;}
+
 .mas img {display: block;width: 100%;height: 100%;object-fit: contain;animation: pop .4s;border-radius: 8px;}
+
 .info{flex:1;min-width:0}
+
 .info b{display:block;font-size:1.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 .cap{color:var(--muted);font-size:.95rem;min-height:1.3em}
+
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;font-weight:800;font-size:.95rem}
+
 .chips span{background:var(--bg);border-radius:10px;padding:0 8px}
+
 .chips .cb{background:var(--or);color:#fff;visibility:hidden}
+
 .chips .cb.on{visibility:visible;animation:pop .3s}
+
 .bar{height:12px;border-radius:9px;background:var(--bg);margin:10px 4px 0;overflow:hidden;border:2px solid var(--line)}
-.bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--or),#ffb347);transform-origin:left;transition:background .3s}
+
+.bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--or),#ffb347);transform-origin:left;transition:*background* .3s}
+
 .bar.low i{background:#e5383b}
+
 .bar.ice i{background:#4cc9f0}
+
 .board{display:grid;gap:10px;margin:16px auto;grid-template-columns:repeat(var(--c),1fr);width:var(--w,100%)}
+
 .card{perspective:700px;border:0;background:none;padding:0;aspect-ratio:1/1.08}
+
 .in{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.3,1.4,.5,1)}
+
 .card.up .in,.card.ok .in{transform:rotateY(180deg)}
+
 .f{position:absolute;inset:0;border-radius:16px;backface-visibility:hidden;display:grid;place-items:center;overflow:hidden}
+
 .bk{background:repeating-linear-gradient(135deg,#14307a 0 10px,#183a8f 10px 20px);border:3px solid #fff;box-shadow:0 4px 0 #08183f}
+
 .bk em{font-style:normal;font-weight:800;font-size:clamp(1.4rem,5vw,2.2rem);color:#fff;background:var(--or);width:54%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;border:3px solid #fff}
+
 .fr{background:#fff;transform:rotateY(180deg);border:3px solid var(--line);box-shadow:0 4px 0 var(--line)}
+
+.pair-dot{position:absolute;top:7px;right:7px;width:17px;height:17px;border-radius:50%;background:var(--pair-color);border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.45);z-index:2;pointer-events:none}
+
+.form-help{color:var(--muted);font-size:.95rem;margin:0 0 12px}
+
+.player-form{display:grid;gap:10px;text-align:left;margin-top:12px}
+
+.player-form label{font-weight:800;color:var(--ink)}
+
+.player-form input{width:100%;padding:10px;border:2px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;font-size:1.1rem;text-align:center}
+
+.player-form input:focus{outline:3px solid rgba(247,134,30,.25);border-color:var(--or)}
+
+.form-error{min-height:1.2em;color:#d62828;font-weight:800;text-align:center}
+
+.ranking-level{background:var(--bg);border-radius:16px;padding:12px;margin:10px 0;text-align:left}
+
+.ranking-level h3{font-size:1.05rem;margin:0 0 8px}
+
+.ranking-list{padding-left:24px;margin:0;display:grid;gap:6px}
+
+.ranking-list li{padding:6px 10px;background:var(--card);border-radius:9px;display:flex;justify-content:space-between;align-items:center}
+
+.ranking-pos{font-weight:800;color:var(--or);margin-right:8px}
+
+.ranking-time{font-weight:800;color:var(--or);font-variant-numeric:tabular-nums}
+
+.ranking-empty{color:var(--muted);margin:0;font-size:.92rem}
+.ranking-list small{display:block;color:var(--muted);font-size:.82rem;line-height:1.1}
+.ranking-list li>div:last-child{text-align:right;white-space:nowrap}
+.comic-book{display:grid;gap:22px;margin-top:16px}
+.comic-progress{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 16px;font-weight:800}
+.comic-page{min-width:0;overflow:hidden}
+.comic-page.locked{border-style:dashed;opacity:.88}
+.comic-lock-content{min-height:170px;display:grid;place-content:center;justify-items:center;gap:8px;text-align:center;background:var(--bg);border-radius:16px;padding:18px}
+.comic-lock-icon{font-size:2.8rem;line-height:1}
+.comic-lock-content p{margin:0;color:var(--muted)}
+
+.howto-content{display:grid;gap:14px;margin-top:16px}
+.howto-card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:16px;text-align:left}
+.howto-card h3{margin:0 0 7px;color:var(--navy);font-size:1.22rem}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .howto-card h3{color:#fff}}
+.howto-card p{margin:5px 0;line-height:1.4}
+.howto-card ul{margin:8px 0 0;padding-left:22px;display:grid;gap:6px}
+.howto-power{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:10px}
+.howto-power-item{background:var(--bg);border-radius:12px;padding:10px;display:flex;gap:9px;align-items:center}
+.howto-power-item strong{display:block}
+.howto-power-item small{display:block;color:var(--muted);line-height:1.25}
+.pbtn b{position:absolute;top:-8px;right:-6px;background:var(--or);color:#fff;border-radius:12px;min-width:22px;width:auto;height:22px;padding:0 5px;display:grid;place-items:center;font-size:.65rem;white-space:nowrap}
+.pbtn:disabled b{background:#68738b}
+@media(max-width:600px){.howto-power{grid-template-columns:1fr}}
+
+
+.comic-section{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 5px 0 rgba(8,24,63,.10)}
+.comic-section-title{margin:0 0 6px;color:var(--navy);font-size:1.45rem}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .comic-section-title{color:#fff}}
+.comic-section-intro{margin:0 0 14px;color:var(--muted);line-height:1.4}
+.comic-cast-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:12px}
+.comic-character-card{display:flex;align-items:flex-start;gap:12px;min-width:0;background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:12px}
+.comic-character-avatar{width:58px;height:58px;flex:0 0 58px;display:grid;place-items:center;border-radius:16px;background:linear-gradient(145deg,#fff,#ffe2b8);border:2px solid var(--or);font-size:2rem;box-shadow:0 3px 0 rgba(185,93,8,.18)}
+.comic-character-card h4{margin:0 0 3px;font-size:1.05rem;line-height:1.2}
+.comic-character-card p{margin:0;font-size:.92rem;line-height:1.35;color:var(--muted)}
+.comic-character-role{display:inline-block;margin-top:6px;padding:2px 8px;border-radius:999px;background:var(--card);color:var(--navy);font-size:.75rem;font-weight:800}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .comic-character-role{color:#eaf0ff}}
+.power-origin-intro{background:#fff4df;color:#493016;border:2px solid var(--or);border-radius:16px;padding:14px;line-height:1.45;margin:12px 0 14px}
+.power-origin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:11px}
+.power-origin-card{display:flex;align-items:flex-start;gap:11px;min-width:0;background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:12px}
+.power-origin-icon{width:48px;height:48px;flex:0 0 48px;display:grid;place-items:center;border-radius:50%;background:var(--card);border:2px solid var(--or);font-size:1.65rem}
+.power-origin-card h4{margin:0 0 3px;font-size:1rem}
+.power-origin-card p{margin:4px 0 0;font-size:.9rem;line-height:1.35;color:var(--muted)}
+.power-origin-card .power-owner{font-size:.78rem;font-weight:800;color:var(--or)}
+.power-origin-ending{margin:14px 0 0;padding:13px 15px;background:var(--navy);color:#fff;border-radius:15px;font-weight:700;line-height:1.4}
+@media(max-width:600px){.comic-section{padding:13px}.comic-cast-grid,.power-origin-grid{grid-template-columns:1fr}.comic-character-avatar{width:52px;height:52px;flex-basis:52px}}
+
+.comic-page{background:var(--card);border:3px solid var(--navy);border-radius:22px;padding:16px;box-shadow:0 6px 0 rgba(8,24,63,.16)}
+.comic-page h3{margin:0 0 12px;color:var(--navy);font-size:1.35rem}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .comic-page h3{color:#fff}}
+.comic-feature{display:grid;grid-template-columns:minmax(0,180px) minmax(0,1fr);gap:14px;align-items:center;margin-bottom:14px}
+.comic-art-frame{width:100%;max-width:180px;height:156px;display:grid;place-items:center;overflow:hidden;background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:7px;margin:0 auto}
+.comic-art-frame img,.comic-panel img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;border:0;border-radius:8px;margin:0}
+.comic-feature p{margin:0}
+.comic-bubble{min-width:0;background:#fff4df;color:#493016;border:2px solid var(--or);border-radius:18px;padding:12px 14px;font-size:1.05rem;line-height:1.25;position:relative;overflow-wrap:anywhere}
+.comic-panels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.comic-panel{min-width:0;background:var(--bg);border:3px solid var(--ink);border-radius:14px;padding:10px;min-height:150px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.comic-panel p{overflow-wrap:anywhere}
+.comic-panel b{font-size:.8rem;color:var(--or);letter-spacing:.04em}
+.comic-panel p{margin:0;line-height:1.25}
+.comic-speaker{font-size:.88rem;font-weight:800;color:var(--muted)}
+@media(max-width:600px){
+  .comic-feature{grid-template-columns:minmax(0,1fr)}
+  .comic-art-frame{width:min(100%,220px);height:150px}
+  .comic-panels{grid-template-columns:1fr}
+  .comic-panel{min-height:0}
+}
+
+
+
 .fr img{width:92%;height:92%;object-fit:contain;border-radius:8px}
+
 .card.ok .fr{border-color:var(--or);box-shadow:0 0 0 3px rgba(247,134,30,.35)}
+
 .card.ok{animation:hop .5s .35s}
+
 .card.no{animation:shake .4s}
+
 @keyframes hop{50%{transform:translateY(-8px) scale(1.06)}}
+
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
+
+
 /* floating emojis */
+
 .floating-emoji {position: fixed;pointer-events: none;font-size: 2rem;z-index: 50;animation: floatUp 1.2s ease-out forwards;}
+
 @keyframes floatUp {0% { transform: translateY(0) scale(1); opacity: 1; }100% { transform: translateY(-100px) scale(1.5); opacity: 0; }}
 
+
+
 /* modal */
+
 .md{position:fixed;inset:0;background:rgba(6,14,40,.72);display:none;place-items:center;padding:16px;z-index:20;overflow:auto}
+
 .md.on{display:grid}
+
 .box{background:var(--card);border-radius:28px;padding:22px;max-width:520px;width:100%;text-align:center;animation:pop .4s;border:3px solid var(--or);max-height:92vh;overflow:auto}
 
-/* ⬇️ CORREÇÃO AQUI: Ajustando todas as imagens dentro dos modais ⬇️ */
+
+
 .box img {
-  max-width: 100%;
-  max-height: 220px; /* Impede que a imagem fique gigante */
-  object-fit: contain; /* Mantém a proporção sem esticar */
+ max-width: 100%;
+
+  max-height: 220px;
+
+  object-fit: contain;
+
   border-radius: 16px;
+
   margin: 0 auto 16px;
+
   display: block;
+
 }
-.box img.big{width:min(200px,50vw)}
-/* ⬆️ FIM DA CORREÇÃO ⬆️ */
+
+.box img.big{width:min(160px,44vw)}
+/* Imagens de introdução, vitória e derrota nunca ultrapassam o quadro do modal. */
+.box > img{display:block;width:min(160px,44vw);height:clamp(90px,17vh,145px);max-width:100%;max-height:145px;object-fit:contain;margin:0 auto 12px;border-radius:14px}
+#luckBox{width:min(100%,420px);padding:clamp(16px,3vw,22px)}
+#luckImg{width:min(145px,40vw);height:clamp(85px,15vh,125px);max-height:125px;object-fit:contain}
+#resBox > img{width:min(160px,44vw);height:clamp(90px,17vh,145px);object-fit:contain}
+
+
 
 .box h2{margin:0 0 4px}
+
 .stars{font-size:2.6rem;color:var(--or);letter-spacing:6px}
+
 .stars s{text-decoration:none;opacity:.25}
+
 .sc{color:var(--muted);margin:0 0 12px}
+
 .album{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin:12px 0}
-.album div{background:var(--bg);border-radius:14px;padding:6px;aspect-ratio:1}
-.album img{width:100%;height:100%;object-fit:cover;border-radius:8px}
-.album .lock img{filter:brightness(0);opacity:.18}
+.album-item{position:relative;display:grid;place-items:center;width:100%;min-width:0;aspect-ratio:1;background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:6px;overflow:hidden;cursor:zoom-in;transition:transform .15s,border-color .15s}
+.album-item:not(:disabled):hover{transform:translateY(-2px);border-color:var(--or)}
+.album-item img{display:block;width:100%;height:100%;max-width:100%;max-height:none;object-fit:contain;border-radius:8px;margin:0}
+.album-item.lock{cursor:not-allowed;opacity:.65}
+.album-item.lock img{filter:brightness(0);opacity:.18}
+.album-lock{position:absolute;inset:0;display:grid;place-items:center;font-size:1.5rem;pointer-events:none}
+.image-lightbox{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:16px;background:rgba(3,8,25,.88)}
+.image-lightbox.on{display:grid}
+.image-lightbox-content{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:min(96vw,1000px);height:min(94vh,850px);padding:42px 12px 18px}
+.image-lightbox-content img{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100% - 34px);object-fit:contain;margin:0;border-radius:14px;background:#fff;box-shadow:0 12px 36px rgba(0,0,0,.35)}
+.image-lightbox-content p{margin:10px 0 0;color:#fff;font-weight:800;text-align:center}
+.image-lightbox-close{position:absolute;top:0;right:0;width:42px;height:42px;border:2px solid #fff;border-radius:50%;background:var(--or);color:#fff;font-size:1.7rem;font-weight:800;line-height:1;z-index:1}
+
 .ach{list-style:none;padding:0;margin:12px 0;text-align:left;display:grid;gap:8px}
+
 .ach li{display:flex;gap:10px;align-items:center;background:var(--bg);border-radius:14px;padding:8px 12px;opacity:.5}
+
 .ach li.got{opacity:1;border-left:6px solid var(--or)}
+
 .ach span{font-size:1.7rem}
+
 .ach small{display:block;color:var(--muted);line-height:1.1}
+
 .toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-140%);background:var(--navy);color:#fff;border:3px solid var(--or);border-radius:18px;padding:8px 16px;z-index:30;transition:transform .4s;display:flex;gap:10px;align-items:center;max-width:92vw}
+
 .toast.on{transform:translate(-50%,0)}
+
 .toast span{font-size:1.8rem}
+
 .cf{position:fixed;top:-20px;width:10px;height:14px;z-index:40;pointer-events:none;animation:fall linear forwards}
+
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
 .card{position:relative}
+
 .pp{position:absolute;left:50%;top:10%;font-style:normal;font-weight:800;font-size:1.5rem;color:var(--or);text-shadow:0 2px 0 #fff,0 0 8px #fff;pointer-events:none;animation:flt .9s forwards;z-index:3}
+
 @keyframes flt{to{transform:translate(-50%,-50px);opacity:0}}
+
 .shk{animation:shake .35s}
+
 .mix .in{animation:spin .6s}
+
 @keyframes spin{50%{transform:rotateY(180deg) scale(.6) rotate(20deg)}}
+
 .pw{display:flex;gap:10px;justify-content:center;position:sticky;bottom:0;padding:10px 4px calc(8px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 35%);z-index:4;overflow-x:auto}
+
 .pbtn{flex:none;position:relative;background:var(--navy);color:#fff;border:2px solid #fff;border-radius:16px;min-width:72px;padding:4px 6px;display:grid;justify-items:center;line-height:1.05;box-shadow:0 4px 0 #08183f}
+
 .pbtn span{font-size:1.6rem}.pbtn small{font-size:.72rem}
+
 .pbtn b{position:absolute;top:-8px;right:-6px;background:var(--or);border-radius:50%;width:22px;height:22px;display:grid;place-items:center;font-size:.8rem}
+
 .pbtn:disabled{opacity:.35}
+
 .cast{font-weight:800;color:var(--muted);margin-bottom:4px}.cast span{font-size:1.6rem}
+
 input[type=range]{accent-color:var(--or);width:120px}
+
 @media(max-width:600px){.screen{padding:10px 10px 30px}.mas{width:62px;height:56px}.hud{padding:6px 8px 6px 6px;gap:8px}.cap{font-size:.85rem}.chips{font-size:.8rem}.btn{font-size:1rem;padding:8px 16px}.lvls{grid-template-columns:1fr 1fr}.lv img{width:40px}.say{min-height:7em;font-size:1.1rem}.pw{justify-content:flex-start}.board{gap:6px}}
+
 </style>
+
 </head>
+
 <body>
-<!-- Música de fundo -->
+
+
+
 <audio id="bgm" loop preload="auto" src="contadinho.aac"></audio>
 
+
+
 <section class="screen on" id="home">
+
   <img class="hero" id="heroImg" alt="Contadinho, o mascote">
+
   <h1>Contadinho e a<br><b>Missão Inventário</b></h1>
+
   <p>Encontre os pares, ajude o Contadinho a contar tudo e descubra a história dele, fase por fase.</p>
+
   <div class="row">
+
     <button class="btn" id="play">Jogar</button>
+
     <button class="btn alt" data-open="map">Fases</button>
+
     <button class="btn alt" data-open="album">Álbum</button>
+
     <button class="btn alt" data-open="ach">Conquistas</button>
+
+    <button class="btn alt" id="comicHome">📖 História em quadrinhos</button>
+    <button class="btn alt" id="howtoHome">❔ Como jogar</button>
   </div>
-  <div class="row"><button class="btn ghost" id="mus">🎵 Música</button><label class="btn ghost">🎼 Trocar música<input type="file" accept="audio/*" id="mfile" hidden></label><input type="range" id="vol" min="0" max="1" step=".05" value=".5" aria-label="Volume da música"></div>
-  <div class="row"><button class="btn ghost" id="snd">Som: ligado</button><button class="btn ghost" id="reset">Apagar progresso</button></div>
+
+  <div class="row"><button class="btn ghost" id="mus">🎵 Música</button><input type="range" id="vol" min="0" max="1" step=".05" value=".5" aria-label="Volume da música"></div>
+
+  <div class="row"><button class="btn ghost" id="snd">Som: ligado</button><button class="btn ghost" id="rankingHome">🏆 Ranking</button></div>
+
 </section>
 
+
+
 <section class="screen" id="map">
+
   <div class="row" style="justify-content:space-between;margin:0"><h2>Fases</h2><button class="btn ghost" data-go="home">Início</button></div>
+
   <div class="lvls" id="lvls"></div>
+
+</section>
+
+
+
+<section class="screen" id="comic">
+  <div class="row" style="justify-content:space-between;margin:0">
+    <h2>📖 A história do Contadinho</h2>
+    <button class="btn ghost" data-go="home">Início</button>
+  </div>
+  <p class="sc">Acompanhe as aventuras do Contadinho em páginas de quadrinhos, capítulo por capítulo.</p>
+  <div id="comicContent" class="comic-book"></div>
+</section>
+
+<section class="screen" id="howto">
+  <div class="row" style="justify-content:space-between;margin:0">
+    <h2>❔ Como jogar</h2>
+    <button class="btn ghost" data-go="home">Início</button>
+  </div>
+  <p class="sc">Aprenda as regras e conheça os recursos antes de começar sua missão.</p>
+  <div class="howto-content">
+    <article class="howto-card">
+      <h3>🎯 Objetivo</h3>
+      <p>Encontre todos os pares de cartas antes que o tempo termine. Cada fase tem uma quantidade diferente de pares e fica mais desafiadora conforme você avança.</p>
+    </article>
+    <article class="howto-card">
+      <h3>🃏 Como encontrar os pares</h3>
+      <ul>
+        <li>Todas as cartas começam viradas para baixo.</li>
+        <li>Clique em duas cartas para revelar as imagens.</li>
+        <li>Quando forem um par correto, elas permanecem abertas.</li>
+        <li>Quando forem diferentes, elas voltam a ficar viradas para baixo.</li>
+        <li>A bolinha colorida no canto superior direito identifica o par. Mesmo que duas cartas tenham a mesma imagem, cores diferentes indicam pares diferentes.</li>
+      </ul>
+    </article>
+    <article class="howto-card">
+      <h3>⏱️ Tempo e pontuação</h3>
+      <ul>
+        <li>O cronômetro começa quando a fase inicia.</li>
+        <li>O tempo disponível aumenta conforme a dificuldade e a quantidade de pares da fase.</li>
+        <li>Cada par encontrado vale pontos; os combos aumentam a pontuação dos acertos seguidos, até o multiplicador máximo de 5x.</li>
+        <li>Cada segundo restante gera 10 pontos extras ao concluir a fase.</li>
+        <li>Ao errar, aparece o aviso: <strong>“Cuidado com a UPM!”</strong></li>
+      </ul>
+    </article>
+    <article class="howto-card">
+      <h3>🧰 Poderes — uso único</h3>
+      <p>Cada um dos seis poderes pode ser usado <strong>uma única vez durante toda a campanha daquele jogador</strong>. Depois de usar em qualquer fase, ele ficará marcado como “USADO” e continuará bloqueado nas fases seguintes. O uso permanece salvo mesmo se o tempo acabar.</p>
+      <div class="howto-power">
+        <div class="howto-power-item"><span>👀</span><div><strong>Espiar</strong><small>Revela por alguns instantes as cartas que ainda não foram encontradas.</small></div></div>
+        <div class="howto-power-item"><span>❄️</span><div><strong>Congelar</strong><small>Para o cronômetro por 8 segundos.</small></div></div>
+        <div class="howto-power-item"><span>🧲</span><div><strong>Ímã da Celine</strong><small>Encontra automaticamente um par disponível.</small></div></div>
+        <div class="howto-power-item"><span>🛡️</span><div><strong>Escudo</strong><small>Protege contra o próximo erro.</small></div></div>
+        <div class="howto-power-item"><span>🚀</span><div><strong>Turbo</strong><small>Dobra os pontos dos próximos 3 pares.</small></div></div>
+        <div class="howto-power-item"><span>⏰</span><div><strong>+12 segundos</strong><small>Adiciona até 12 segundos ao tempo restante, sem ultrapassar o tempo inicial da fase.</small></div></div>
+      </div>
+    </article>
+    <article class="howto-card">
+      <h3>🪪 Identificação do jogador</h3>
+      <p>Antes de jogar, informe seu nome e sua matrícula. O jogo usa as <strong>3 primeiras letras do nome</strong> e os <strong>3 últimos números da matrícula</strong> para formar sua identificação no ranking.</p>
+      <p><strong>Exemplo:</strong> Samoel + matrícula 123456 = <strong>SAM-456</strong>.</p>
+    </article>
+    <article class="howto-card">
+      <h3>🏆 Fases e ranking</h3>
+      <ul>
+        <li>As fases são desbloqueadas em sequência; ao concluir uma fase, o capítulo correspondente da história em quadrinhos também é liberado.</li>
+        <li>Uma fase concluída ou encerrada pelo tempo não pode ser jogada novamente.</li>
+        <li>Se o cronômetro zerar, você segue para a próxima fase mesmo que não tenha encontrado nenhum par. Não existe opção de tentar novamente.</li>
+        <li>No álbum, clique em um adesivo já desbloqueado para abrir a imagem ampliada.</li>
+        <li>O ranking geral soma os pontos das fases registradas para cada identificação.</li>
+        <li>Em caso de empate na pontuação, fica à frente quem tiver o menor tempo acumulado.</li>
+      </ul>
+    </article>
+  </div>
 </section>
 
 <section class="screen" id="story">
+
   <div class="stage">
+
     <div class="tag" id="stTag"></div>
+
     <h2 id="stTitle"></h2>
+
     <img id="stImg" alt=""><div class="cast" id="stCast"></div>
+
     <p class="say" id="stSay" aria-live="polite"></p>
+
     <button class="btn" id="stNext">Continuar</button>
+
   </div>
+
 </section>
+
+
 
 <section class="screen" id="game">
+
   <div class="hud">
+
     <div class="mas"><img id="masImg" alt=""></div>
+
     <div class="info">
+
       <b id="gTitle"></b>
+
       <div class="cap" id="gCap">Memorize e vire os pares!</div>
+
       <div class="chips"><span id="gMoves">0 jogadas</span><span id="gScore">0 pts</span><span class="cb" id="gCombo">Combo x2</span></div>
+
     </div>
+
     <button class="btn ghost" id="mus2" aria-label="Música" style="padding:6px 12px">🎵</button><button class="btn ghost" data-go="map" aria-label="Sair para as fases" style="padding:6px 12px">✕</button>
+
   </div>
+
   <div class="bar" id="bar"><i id="barI"></i></div>
+
   <div class="board" id="board"></div>
+
   <div class="pw" id="pw"></div>
+
 </section>
 
-<!-- Modal de Sorte antes de começar a fase -->
+
+
 <div class="md" id="luck">
+
   <div class="box" id="luckBox">
+
     <img id="luckImg" src="" alt="Boa sorte!">
+
     <h2>Boa sorte!</h2>
+
     <p class="sc">Contadinho está torcendo por você. Encontre todos os pares!</p>
+
     <button class="btn" id="luckBtn">Começar!</button>
+
   </div>
+
 </div>
+
+
 
 <div class="md" id="res"><div class="box" id="resBox"></div></div>
 <div class="md" id="panel"><div class="box" id="panelBox"></div></div>
+<div class="image-lightbox" id="imageLightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Imagem ampliada do álbum">
+  <div class="image-lightbox-content">
+    <button class="image-lightbox-close" id="imageLightboxClose" type="button" aria-label="Fechar imagem">×</button>
+    <img id="imageLightboxImg" src="" alt="">
+    <p id="imageLightboxCaption"></p>
+  </div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
+
+
 <script>
-/* 
-  ⚠️ IMPORTANTE: 
-  Salve as imagens que você enviou na mesma pasta deste arquivo HTML.
-  Renomeie elas exatamente assim:
-  img1.jpeg (Joinha com prancheta)
-  img2.jpeg (Apresentando)
-  img3.jpeg (Dançando com fone)
-  img4.jpeg (Comendo açaí)
-  img5.jpeg (Galpão com prancheta)
-  img6.jpeg (Recebimento)
-  img7.jpeg (Esteira com caixa)
-  img8.jpeg (Marmita)
-  img9.jpeg (Mochila)
-  img10.jpeg (Equipe)
-*/
 
 const IM = [
+
   "img1.jpeg",
+
   "img2.jpeg",
+
   "img3.jpeg",
+
   "img4.jpeg",
+
   "img5.jpeg",
+
   "img6.jpeg",
+
   "img7.jpeg",
+
   "img8.jpeg",
+
   "img9.jpeg",
+
   "img1.jpeg",
+
   "img2.jpeg",
+
   "img5.jpeg",
+
   "img6.jpeg",
+
   "img10.jpeg"
+
 ];
+
+
 
 const NAMES = ["Bora contar!","Missão Inventário!","Trabalho com alegria!","Juntos fazemos mais!","Gratidão por toda a empresa!","É nós!","Contagem em dia!","Tá quase!","Organização é tudo!","Pausa para o lanche!","Inventário finalizado!","Foco, atenção!","Você consegue!","Missão cumprida!"];
+
 const LV = [
+
  {n:"Primeiro dia",p:3,sp:0,intro:["Era uma vez uma caixinha de papelão com um boné novinho e um grande sonho: ser o melhor contador da empresa.","Hoje é o primeiro dia dele. A chefe entrega uma prancheta e diz: “Comece pelas caixas da entrada!”"],outro:["Três pares encontrados e a prancheta já está cheia. Contadinho sente o coração apertar de tanta alegria."]},
- {n:"O depósito misterioso",p:4,sp:6,intro:["A missão é grande: contar tudo o que existe no depósito, sem esquecer uma única caixa.","No fundo do corredor, as pilhas parecem se mexer. Será que alguém está trocando as caixas de lugar?"],outro:["Era só o vento da porta! Contadinho ri sozinho e anota tudo no inventário."]},
- {n:"Corredor das prateleiras",p:6,sp:2,intro:["Nas prateleiras, os colegas assobiam enquanto trabalham. Contadinho aprende que dá para contar e se divertir ao mesmo tempo.","“Trabalho com alegria rende o dobro!”, diz o Seu Zé do estoque."],outro:["Os colegas aplaudem. Pela primeira vez, Contadinho entende que não está sozinho."]},
+
+ {n:"O depósito misterioso",p:4,sp:6,intro:["A missão é grande: contar tudo o que existe no depósito, sem esquecer uma única caixa.","No fundo do corredor, das pilhas parecem se mexer. Será que alguém está trocando as caixas de lugar?"],outro:["Era só o vento da porta! Contadinho ri sozinho e anota tudo no inventário."]},
+
+ {n:"Corredor das prateleiras",p:6,sp:2,intro:["Nas prateleiras, os colegas assobiam enquanto trabalham. Contadinho aprende que dá para contar e se divertir ao mesmo tempo.","“Trabalho com alegria rende o dobro!”, diz o Seu Arnaldo do estoque."],outro:["Os colegas aplaudem. Pela primeira vez, Contadinho entende que não está sozinho."]},
+
  {n:"Galpão do frio",p:8,sp:4,intro:["Brrr! No galpão refrigerado, as etiquetas congelam e os números ficam embaralhados.","Contadinho respira fundo. Contagem em dia não pode esperar o degelo."],outro:["Setor conferido! Dona Rita, da expedição, agradece de coração. Gratidão faz o frio passar."]},
+
  {n:"Noite da organização",p:10,sp:5,intro:["A noite chega e a empresa fica silenciosa. Sobram só Contadinho e uma montanha de caixas fora do lugar.","“Organização é tudo”, ele repete, e começa a separar cada coisa no seu cantinho."],outro:["Tudo no lugar, até o relógio parece sorrir. Só falta um pouquinho para terminar!"]},
+
  {n:"A pausa do lanche",p:12,sp:7,intro:["O cheiro de café fresco toma conta do refeitório. Contadinho está faminto, mas o inventário ainda não acabou.","Ele promete: um par a mais, e então o lanche. Dessa vez a distração é de verdade!"],outro:["Pão com café merecido! Com a barriga cheia e o boné no lugar, ele encara a última etapa."]},
+
  {n:"A grande auditoria",p:14,sp:13,intro:["Amanhecer. Os auditores chegam com pranchetas ainda maiores que a dele.","Todas as caixas do prédio estão na mesa. É agora ou nunca, Contadinho!"],outro:["Zero divergências! A empresa inteira vibra, e o boné de Contadinho ganha uma estrela dourada."]}
+
 ];
+
 const ACH = [
+
  ["first","🎯","Primeira dupla","Encontre seu primeiro par"],
+
  ["c3","🔥","Combo x3","Acerte 3 pares seguidos"],
+
  ["c5","⚡","Combo x5","Acerte 5 pares seguidos"],
+
  ["perf","💎","Sem errar","Termine uma fase a partir da 2 sem nenhum erro"],
+
  ["fast","⏱️","Relâmpago","Termine com mais da metade do tempo sobrando"],
+
  ["s3","⭐","Três estrelas","Conquiste 3 estrelas em uma fase"],
+
  ["pure","🧠","Memória de elefante","Vença a fase 4 ou mais sem usar poderes"],
- ["again","💪","Nunca desiste","Tente de novo depois de perder"],
+
+ ["advance","🚶","Sempre em frente","Continue para a próxima fase quando o tempo acabar"],
+
  ["coll","📒","Colecionador","Desbloqueie os 14 adesivos"],
+
  ["end","🏆","Missão cumprida","Zere o jogo"],
+
  ["c8","🌋","Vulcão de combos","Acerte 8 pares seguidos"],
- ["bag","👾","Domador da Bagunça","Vença uma fase em que o Bagunça embaralhou as cartas"],
- ["pow5","🧰","Cinto de utilidades","Use 10 poderes no total"],
+
+ ["bag","👾","Domador do SAP","Vença uma fase em que o SAP embaralhou as cartas"],
+
+ ["pow5","🧰","Kit completo","Use os seis poderes disponíveis, uma única vez cada"],
+
  ["shield","🛡️","Defesa perfeita","Bloqueie um erro com o Escudo"],
+
  ["turbo","🚀","Turbinado","Faça um par com o Turbo ativo"],
- ["mimi","🐱","Amigo da Mimi","Use o Ímã da Mimi"],
+
+ ["mimi","🐱","Amigo da Celine","Use o Ímã da Celine"],
+
  ["rich","💰","Cofre cheio","Chegue a 5000 pontos totais"],
+
  ["marathon","🏃","Maratonista","Vença 15 fases no total"],
+
  ["speed","💨","Contagem expressa","Vença a fase 1 em menos de 20 segundos"],
+
  ["gold","👑","Contador lendário","Consiga 3 estrelas nas 7 fases"]
+
 ];
+
+
+
 const $=s=>document.querySelector(s);
-let S={un:1,stars:[],stk:[],ach:[],tot:0,snd:true,lost:false,mus:true,pu:0,wins:0};
+
+let S={un:1,stars:[],stk:[],ach:[],tot:0,snd:true,lost:false,mus:true,pu:0,wins:0,players:{},player:null,ranking:[],playedStages:[]};
+
 try{const r=localStorage.getItem("caixinha");if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+
+S.players=S.players||{};
+S.ranking=Array.isArray(S.ranking)?S.ranking:[];
+
+S.ranking=Array.isArray(S.ranking)?S.ranking:[];
+
+S.playedStages=Array.isArray(S.playedStages)?S.playedStages:[];
+
+S.player=S.player&&typeof S.player==="object"?S.player:null;
+
+
+
 const save=()=>{try{localStorage.setItem("caixinha",JSON.stringify(S))}catch(e){}};
+
+
+
 const img=(i,alt)=>`<img src="${IM[i]}" alt="${alt||NAMES[i]}">`;
+
+const PAIR_COLORS=["#e63946","#2a9d8f","#4361ee","#f4a261","#9b5de5","#00a6a6","#ef476f","#6a994e","#ff7b00","#577590","#c9184a","#7209b7","#0081a7","#8a5a44"];
+
+const cardFace=id=>`${img(id)}<i class="pair-dot" style="--pair-color:${PAIR_COLORS[id%PAIR_COLORS.length]}" aria-label="Identificador do par ${id+1}"></i>`;
+
+const progress=()=>{
+  const p=S.player
+    ? (S.players[S.player.key]||(S.players[S.player.key]={un:1,stars:[],completed:[],won:[],playedStages:[],usedPowers:[]}))
+    : {un:1,stars:[],completed:[],won:[],playedStages:[],usedPowers:[]};
+  p.stars=Array.isArray(p.stars)?p.stars:[];
+  p.completed=Array.isArray(p.completed)?p.completed:[];
+  p.won=Array.isArray(p.won)?p.won:[];
+  p.playedStages=Array.isArray(p.playedStages)?p.playedStages:[];
+  p.usedPowers=Array.isArray(p.usedPowers)?p.usedPowers:[];
+  return p;
+};
+
+
+
+const isStageBlocked=i=>{
+
+  if(i===0){
+
+    const p=progress();
+
+    return (p.playedStages && p.playedStages[0]) || S.playedStages[0];
+
+  }
+
+  return false;
+
+};
+
+
+
+const isCompleted=i=>{
+
+  const p=progress();
+
+  return !!(p.completed[i]||(p.stars[i]||0)>0);
+
+};
+
+
+
+const formatTime=seconds=>`${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`;
+
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
+
+
 /* sound */
+
 let ac;
+
 function beep(f,d=.12,t="sine",at=0){if(!S.snd)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(.12,ac.currentTime+at);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+at+d);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+at);o.stop(ac.currentTime+at+d)}catch(e){}}
+
 const sfx={flip:()=>beep(520,.07,"triangle"),ok:()=>{beep(660,.1,"square");beep(880,.15,"square",.1)},no:()=>beep(160,.25,"sawtooth"),win:()=>[523,659,784,1047].forEach((f,i)=>beep(f,.18,"square",i*.12)),lose:()=>[400,300,200].forEach((f,i)=>beep(f,.2,"sawtooth",i*.15))};
+
+
 
 function confetti(){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;const c=["#f7861e","#14307a","#ffb347","#4cc9f0","#fff"];for(let i=0;i<60;i++){const e=document.createElement("i");e.className="cf";e.style.left=Math.random()*100+"vw";e.style.background=c[i%5];e.style.animationDuration=2+Math.random()*2+"s";e.style.animationDelay=Math.random()*.6+"s";document.body.appendChild(e);setTimeout(()=>e.remove(),5000)}}
 
+
+
 /* nav */
-function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));scrollTo(0,0);if(id==="map")renderMap()}
+
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));scrollTo(0,0);if(id==="map")renderMap();if(id==="comic")renderComic()}
+
 document.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(g){stop();show(g.dataset.go)}const o=e.target.closest("[data-open]");if(o){o.dataset.open==="map"?show("map"):openPanel(o.dataset.open)}});
+
 $("#heroImg").src=IM[0];$("#heroImg").alt="Contadinho";
-$("#play").onclick=()=>startStory(Math.min(S.un,LV.length)-1);
+
+
+
+$("#play").onclick=()=>openPlayerModal(()=>{
+
+  const p=progress();
+
+  let next=LV.findIndex((_,i)=>{
+
+    if(i===0 && isStageBlocked(0)) return false;
+
+    return !isCompleted(i);
+
+  });
+
+  if(next<0){
+
+    if(isStageBlocked(0) && !isCompleted(1)){
+
+      next = 1;
+
+    } else {
+
+      openPanel("ranking");
+
+      toast("🎉 Nenhuma fase disponível para jogar!");
+
+      return;
+
+    }
+
+  }
+
+  startStory(next);
+
+});
+
+$("#rankingHome").onclick=()=>openPanel("ranking");
+$("#comicHome").onclick=()=>show("comic");
+$("#howtoHome").onclick=()=>show("howto");
+
 $("#snd").onclick=()=>{S.snd=!S.snd;save();upSnd()};const upSnd=()=>$("#snd").textContent="Som: "+(S.snd?"ligado":"desligado");upSnd();
-$("#reset").onclick=()=>{if(confirm("Apagar todo o progresso?")){S={un:1,stars:[],stk:[],ach:[],tot:0,snd:S.snd,lost:false,mus:S.mus,pu:0,wins:0};save();renderMap()}};
-function renderMap(){$("#lvls").innerHTML=LV.map((l,i)=>{const st=S.stars[i]||0;return `<button class="lv" data-i="${i}" ${i+1>S.un?"disabled":""}><small>Fase ${i+1} · ${l.p*2} cartas</small><strong>${l.n}</strong><span class="st">${"★".repeat(st)}${"☆".repeat(3-st)}</span>${i+1>S.un?"<small>🔒 Bloqueada</small>":img(l.sp)}</button>`}).join("");
- document.querySelectorAll(".lv").forEach(b=>b.onclick=()=>startStory(+b.dataset.i))}
+
+
+
+function openPlayerModal(onConfirm){
+  const b=$("#panelBox"),old=S.player||{};
+  const oldName=(old.firstRaw||old.fullName||"").split(/\s+/)[0];
+  const safeName=escapeHtml(oldName);
+  const safeMatricula=escapeHtml(old.matricula||"");
+
+  b.innerHTML=`<h2>Identificação do jogador</h2>
+    <p class="sc">Sua identificação no ranking será formada pelas 3 primeiras letras do nome e pelos 3 últimos números da matrícula.</p>
+    <form class="player-form" id="playerForm">
+      <label for="pFirstName">Nome</label>
+      <input id="pFirstName" type="text" placeholder="Ex: Samoel" value="${safeName}" autocomplete="given-name" required>
+      <label for="pMatricula">Matrícula</label>
+      <input id="pMatricula" type="text" inputmode="numeric" placeholder="Ex: 123456" value="${safeMatricula}" required>
+      <p class="form-help">Exemplo: Samoel + matrícula 123456 = SAM-456.</p>
+      <p class="form-error" id="playerError" aria-live="polite"></p>
+      <div class="row"><button class="btn ghost" type="button" id="playerCancel">Cancelar</button><button class="btn" type="submit">Continuar</button></div>
+    </form>`;
+
+  $("#panel").classList.add("on");
+  $("#playerCancel").onclick=()=>$("#panel").classList.remove("on");
+
+  $("#playerForm").onsubmit=e=>{
+    e.preventDefault();
+
+    const nameRaw=$("#pFirstName").value.trim();
+    const matriculaRaw=$("#pMatricula").value.trim();
+    const nameLetters=nameRaw
+      .replace(/[^A-Za-zÀ-ÿ]/g,"")
+      .slice(0,3)
+      .toLocaleUpperCase("pt-BR");
+    const digits=matriculaRaw.replace(/\D/g,"");
+    const lastDigits=digits.slice(-3);
+
+    if(nameLetters.length!==3 || lastDigits.length!==3){
+      $("#playerError").textContent="Informe um nome com pelo menos 3 letras e uma matrícula com pelo menos 3 números.";
+      return;
+    }
+
+    const key=nameLetters+"_"+lastDigits;
+    const identifier=nameLetters+"-"+lastDigits;
+
+    S.player={
+      firstRaw:nameRaw,
+      matricula:matriculaRaw,
+      key,
+      identifier
+    };
+
+    if(!S.players[key]){
+      S.players[key]={un:1,stars:[],completed:[],won:[],playedStages:[],usedPowers:[]};
+    }
+
+    save();
+    $("#panel").classList.remove("on");
+    if(onConfirm)onConfirm();
+  };
+}
+
+
+function requestLevel(i){
+
+  if(isStageBlocked(i)){
+
+    toast("🔒 A Fase 1 só pode ser jogada uma única vez!");
+
+    return;
+
+  }
+
+  if(isCompleted(i)){
+
+    toast("✅ Esta fase já foi concluída.");
+
+    return;
+
+  }
+
+  if(!S.player){
+
+    openPlayerModal(()=>startStory(i));
+
+    return;
+
+  }
+
+  startStory(i);
+
+}
+
+
+
+function renderMap(){
+
+  const p=progress();
+
+  $("#lvls").innerHTML=LV.map((l,i)=>{
+
+    const st=p.stars[i]||0;
+
+    const completed=isCompleted(i);
+
+    const blocked=isStageBlocked(i);
+
+    const unlocked=i+1<=p.un && !blocked;
+
+    const disabled=completed||blocked||!unlocked;
+
+
+
+    let status = "<small>🔒 Bloqueada</small>";
+
+    if(completed && p.won[i]===false) status = "<small>⏭️ Encerrada — próxima liberada</small>";
+
+    else if(completed) status = "<small>✅ Concluída</small>";
+
+    else if(blocked) status = "<small>⛔ Já jogada (Bloqueada)</small>";
+
+    else if(unlocked) status = "<small>▶ Disponível</small>";
+
+
+
+    return `<button class="lv" data-i="${i}" ${disabled?"disabled":""}><small>Fase ${i+1} · ${l.p*2} cartas</small><strong>${l.n}</strong><span class="st">${"★".repeat(st)}${"☆".repeat(3-st)}</span>${status}${img(l.sp)}</button>`;
+
+  }).join("");
+
+  document.querySelectorAll(".lv:not(:disabled)").forEach(b=>b.onclick=()=>requestLevel(+b.dataset.i));
+
+}
+
+
 
 /* panels */
-function openPanel(k){const b=$("#panelBox");let h="";
- if(k==="album")h=`<h2>Álbum de adesivos</h2><p class="sc">${S.stk.length} de 14 desbloqueados. Forme pares para ganhar!</p><div class="album">${IM.map((_,i)=>`<div class="${S.stk.includes(i)?"":"lock"}">${img(i)}</div>`).join("")}</div>`;
- else h=`<h2>Conquistas</h2><p class="sc">${S.ach.length} de ${ACH.length}</p><ul class="ach">${ACH.map(a=>`<li class="${S.ach.includes(a[0])?"got":""}"><span>${a[1]}</span><div><b>${a[2]}</b><small>${a[3]}</small></div></li>`).join("")}</ul>`;
- b.innerHTML=h+`<button class="btn" id="pClose">Fechar</button>`;$("#panel").classList.add("on");$("#pClose").focus();$("#pClose").onclick=()=>$("#panel").classList.remove("on")}
-let tq;function toast(h){const t=$("#toast");t.innerHTML=h;t.classList.add("on");clearTimeout(tq);tq=setTimeout(()=>t.classList.remove("on"),2800)}
+
+function escapeHtml(value){
+  return String(value??"").replace(/[&<>"']/g,ch=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[ch]));
+}
+
+function getGeneralRanking(){
+  const players=new Map();
+
+  (Array.isArray(S.ranking)?S.ranking:[]).forEach(record=>{
+    if(!record || !record.key) return;
+
+    const key=String(record.key);
+    if(!players.has(key)){
+      players.set(key,{
+        key,
+        identifier:String(record.identifier||key.replace("_","-")).toUpperCase(),
+        phases:new Map()
+      });
+    }
+
+    const player=players.get(key);
+    const phase=Number.isInteger(Number(record.phase))?Number(record.phase):String(record.phase??"");
+    const candidate={
+      score:Number(record.score)||0,
+      seconds:Number(record.seconds)||0,
+      won:record.won!==false
+    };
+    const previous=player.phases.get(phase);
+
+    // Mantém apenas o melhor resultado daquele jogador naquela fase.
+    if(!previous || candidate.score>previous.score ||
+      (candidate.score===previous.score && candidate.seconds<previous.seconds)){
+      player.phases.set(phase,candidate);
+    }
+  });
+
+  return [...players.values()].map(player=>{
+    const results=[...player.phases.values()];
+    return {
+      identifier:player.identifier,
+      completedStages:results.filter(result=>result.won).length,
+      totalScore:results.reduce((sum,result)=>sum+result.score,0),
+      totalSeconds:results.reduce((sum,result)=>sum+result.seconds,0)
+    };
+  }).sort((a,b)=>
+    b.totalScore-a.totalScore ||
+    a.totalSeconds-b.totalSeconds ||
+    b.completedStages-a.completedStages ||
+    a.identifier.localeCompare(b.identifier)
+  );
+}
+
+function openAlbumImage(index){
+  if(!Number.isInteger(index) || index<0 || index>=IM.length || !S.stk.includes(index))return;
+  const viewer=$("#imageLightbox");
+  const image=$("#imageLightboxImg");
+  image.src=IM[index];
+  image.alt=NAMES[index]||`Adesivo ${index+1}`;
+  $("#imageLightboxCaption").textContent=NAMES[index]||`Adesivo ${index+1}`;
+  viewer.classList.add("on");
+  viewer.setAttribute("aria-hidden","false");
+  $("#imageLightboxClose").focus();
+}
+
+function closeAlbumImage(){
+  const viewer=$("#imageLightbox");
+  if(!viewer)return;
+  viewer.classList.remove("on");
+  viewer.setAttribute("aria-hidden","true");
+  $("#imageLightboxImg").src="";
+}
+
+$("#imageLightboxClose").onclick=closeAlbumImage;
+$("#imageLightbox").addEventListener("click",event=>{
+  if(event.target.id==="imageLightbox")closeAlbumImage();
+});
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape")closeAlbumImage();
+});
+
+function openPanel(k){
+  const b=$("#panelBox");let h="";
+
+  if(k==="album"){
+    h=`<h2>Álbum de adesivos</h2><p class="sc">${S.stk.length} de 14 desbloqueados. Clique em um adesivo liberado para ampliar.</p><div class="album">${IM.map((_,i)=>{
+      const unlocked=S.stk.includes(i);
+      return `<button type="button" class="album-item ${unlocked?"unlocked":"lock"}" data-album-index="${i}" ${unlocked?"":"disabled"} aria-label="${unlocked?"Ampliar adesivo "+(NAMES[i]||("Adesivo "+(i+1))):"Adesivo bloqueado"}">${img(i)}${unlocked?"":"<span class=\"album-lock\" aria-hidden=\"true\">🔒</span>"}</button>`;
+    }).join("")}</div>`;
+  } else if(k==="ranking"){
+    const ranking=getGeneralRanking().slice(0,20);
+    h=`<h2>🏆 Ranking geral da empresa</h2>
+      <p class="sc">Soma dos pontos registrados em cada fase. Fases encerradas pelo tempo podem somar os pontos dos pares encontrados, mas não recebem bônus de tempo. Em caso de empate, vence quem acumulou o menor tempo.</p>`;
+
+    if(ranking.length){
+      h+=`<ol class="ranking-list">${ranking.map((r,idx)=>`
+        <li>
+          <div>
+            <span class="ranking-pos">${idx+1}º</span>
+            <b>${escapeHtml(r.identifier)}</b>
+            <small>${r.completedStages} de ${LV.length} fases concluídas</small>
+          </div>
+          <div>
+            <span class="ranking-time">${r.totalScore} pts</span>
+            <small>${formatTime(r.totalSeconds)} acumulados</small>
+          </div>
+        </li>`).join("")}</ol>`;
+    } else {
+      h+=`<p class="ranking-empty">Ainda não existem resultados no ranking. Conclua uma fase para aparecer aqui!</p>`;
+    }
+  } else {
+    h=`<h2>Conquistas</h2><p class="sc">${S.ach.length} de ${ACH.length}</p><ul class="ach">${ACH.map(a=>`<li class="${S.ach.includes(a[0])?"got":""}"><span>${a[1]}</span><div><b>${a[2]}</b><small>${a[3]}</small></div></li>`).join("")}</ul>`;
+  }
+
+  b.innerHTML=h+`<button class="btn" id="pClose">Fechar</button>`;
+  if(k==="album"){
+    b.querySelectorAll("[data-album-index]:not(:disabled)").forEach(button=>{
+      button.addEventListener("click",()=>openAlbumImage(Number(button.dataset.albumIndex)));
+    });
+  }
+  $("#panel").classList.add("on");
+  $("#pClose").focus();
+  $("#pClose").onclick=()=>$("#panel").classList.remove("on");
+}
+
+
+let tq;
+
+function toast(h){const t=$("#toast");t.innerHTML=h;t.classList.add("on");clearTimeout(tq);tq=setTimeout(()=>t.classList.remove("on"),2800)}
+
+
+
 function award(id){if(S.ach.includes(id))return;S.ach.push(id);save();const a=ACH.find(x=>x[0]===id);toast(`<span>${a[1]}</span><div><b>Conquista: ${a[2]}</b></div>`);beep(784,.1,"square");beep(1175,.2,"square",.1)}
 
+
+
 /* story */
+
 let lines=[],li=0,sIdx=0,after=null,tw;
-function startStory(i,pre){const l=LV[i];lines=(pre||[]).concat(l.intro,[CL[i]]);li=0;
+
+
+
+function startStory(i,pre){
+
+  if(isStageBlocked(i)){toast("🔒 Esta fase já foi jogada e não pode ser repetida.");return}
+
+  if(isCompleted(i)){toast("✅ Esta fase já foi concluída.");return}
+
+
+
+  const l=LV[i];lines=(pre||[]).concat(l.intro,[CL[i]]);li=0;
+
   after=()=>{
-    // Tela de sorte antes de iniciar o jogo
+
     $("#luckImg").src = IM[i];
+
     $("#luck").classList.add("on");
+
     $("#luckBtn").onclick = () => {
+
       $("#luck").classList.remove("on");
+
       startGame(i);
+
     };
+
   };
+
   $("#stTag").textContent="Capítulo "+(i+1);$("#stTitle").textContent=l.n;$("#stImg").src=IM[l.sp];$("#stImg").alt=NAMES[l.sp];const c=CH[CAST[i]];$("#stCast").innerHTML=`<span>${c[0]}</span> ${c[1]}`;show("story");say()
+
 }
+
+
+
 function say(){const t=lines[li];$("#stNext").textContent=li<lines.length-1?"Continuar":(after.label||"Começar fase");clearInterval(tw);const el=$("#stSay");let n=0;el.textContent="";tw=setInterval(()=>{n+=2;el.textContent=t.slice(0,n);if(n>=t.length)clearInterval(tw)},22);el.dataset.full=t}
+
 $("#stNext").onclick=()=>{const el=$("#stSay");if(el.textContent!==el.dataset.full){clearInterval(tw);el.textContent=el.dataset.full;return}if(li<lines.length-1){li++;say()}else after()};
 
-/* game */
-let G=null;
-const CAST=["chefe","robo","ze","rita","mimi","bag","chefe"];
-const CH={chefe:["👩‍💼","Chefe Marta"],robo:["🤖","Robô Scan"],ze:["👴","Seu Zé"],rita:["👵","Dona Rita"],mimi:["🐱","Mimi, a gata do estoque"],bag:["👾","Bagunça, o duende"]};
-const CL=["Chefe Marta: “Confio em você, Contadinho. Bora contar!”","Robô Scan: “Bip! Posso espiar as caixas pra você. Bip bip!”","Seu Zé: “Pode contar comigo! Juntos fazemos mais.” Mas cuidado: o duende Bagunça anda à solta!","Dona Rita: “Trouxe café quente pra descongelar essa turma!”","Mimi: “Miau! Eu sei onde cada caixa se esconde. Use meu ímã!”","Bagunça: “Hihi! Vou embaralhar tudo! Ninguém acha nada!”","Chefe Marta: “Última fase! Todo mundo está torcendo por você!”"];
-const PW={peek:["👀","Espiar",2],freeze:["❄️","Congelar",1],hint:["🧲","Ímã da Mimi",1],shield:["🛡️","Escudo",1],turbo:["🚀","Turbo",1],time:["⏰","+12 s",1]};
-function stop(){if(G){clearInterval(G.tk);G=null}}
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
 
-// Função para soltar emojis voando ao acertar
-function spawnEmojis(el) {
-  const emojis = ["🎉", "⭐", "📦", "🎈", "✨", "👍", "🔥", "💎"];
-  const rect = el.getBoundingClientRect();
-  for (let i = 0; i < 6; i++) {
-    const span = document.createElement("span");
-    span.className = "floating-emoji";
-    span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-    span.style.left = (rect.left + rect.width / 2 - 16 + (Math.random() - 0.5) * 40) + "px";
-    span.style.top = (rect.top + rect.height / 2 - 16) + "px";
-    span.style.animationDelay = (i * 0.08) + "s";
-    span.style.fontSize = (1.5 + Math.random()) + "rem";
-    document.body.appendChild(span);
-    setTimeout(() => span.remove(), 1500);
-  }
+
+/* game */
+
+let G=null;
+
+const CAST=["chefe","robo","ze","rita","mimi","bag","chefe"];
+
+const CH={chefe:["👩‍💼","Chefe Luci"],robo:["🤖","Robô Samoel"],ze:["👴","Seu Arnaldo"],rita:["👵","Dona Rita"],mimi:["🐱","Celine, a gata do estoque"],bag:["👾","SAP, o duende"]};
+
+const CL=["Chefe Luci: “Confio em você, Contadinho. Bora contar!”","Robô Samoel: “Bip! Posso espiar as caixas pra você. Bip bip!”","Seu Arnaldo: “Pode contar comigo! Juntos fazemos mais.” Mas cuidado: o duende SAP anda à solta!","Dona Rita: “Trouxe café quente pra descongelar essa turma!”","Celine: “Miau! Eu sei onde cada caixa se esconde. Use meu ímã!”","SAP: “Hihi! Vou embaralhar tudo! Ninguém acha nada!”","Chefe Luci: “Última fase! Todo mundo está torcendo por você!”"];
+
+function renderComic(){
+  const container=$("#comicContent");
+  if(!container)return;
+
+  // Elenco principal: personagens apresentados independentemente do desbloqueio dos capítulos.
+  const characters=[
+    {name:"Contadinho",icon:"📦",role:"O protagonista",text:"Uma caixinha de papelão cheia de vontade de aprender. É curioso, dedicado e descobre que organização também se faz em equipe."},
+    {name:"Chefe Luci",icon:"👩‍💼",role:"Liderança e confiança",text:"Entrega as missões, orienta a equipe e lembra que ninguém precisa enfrentar um desafio sozinho."},
+    {name:"Robô Samoel",icon:"🤖",role:"Olhar tecnológico",text:"É rápido, atento aos detalhes e ajuda Contadinho a enxergar melhor o que está escondido."},
+    {name:"Seu Arnaldo",icon:"👴",role:"Experiência e parceria",text:"Conhece os corredores e sempre encontra um jeito de ajudar quando o tempo está apertado."},
+    {name:"Dona Rita",icon:"👵",role:"Calma e equilíbrio",text:"Com seu jeito acolhedor, ensina que respirar e organizar as ideias também faz parte do trabalho."},
+    {name:"Celine",icon:"🐱",role:"Intuição e curiosidade",text:"A gata do estoque percebe pistas que passam despercebidas e encontra coisas nos lugares mais inesperados."},
+    {name:"SAP",icon:"👾",role:"O duende da distração",text:"Adora embaralhar as coisas e criar confusão. É o desafio que lembra Contadinho de manter o foco e conferir tudo com atenção."}
+  ];
+
+  // Cada poder representa uma habilidade ou um valor que alguém da equipe compartilha com Contadinho.
+  const powers=[
+    {icon:"👀",name:"Espiar",owner:"Robô Samoel",effect:"Revela por alguns instantes as cartas que ainda não foram encontradas.",meaning:"Atenção e observação: olhar com cuidado antes de agir evita confusões."},
+    {icon:"❄️",name:"Congelar",owner:"Dona Rita",effect:"Pausa o cronômetro por 8 segundos.",meaning:"Calma e equilíbrio: uma pausa curta ajuda a respirar, pensar e escolher melhor."},
+    {icon:"🧲",name:"Ímã da Celine",owner:"Celine",effect:"Mostra e encontra automaticamente um par disponível.",meaning:"Intuição e percepção: às vezes uma boa pista ajuda a encontrar o que parecia perdido."},
+    {icon:"🛡️",name:"Escudo",owner:"Chefe Luci",effect:"Protege contra o próximo erro.",meaning:"Confiança e apoio: errar pode acontecer; ter uma equipe que apoia dá coragem para continuar."},
+    {icon:"🚀",name:"Turbo",owner:"Contadinho e sua equipe",effect:"Dobra os pontos dos próximos 3 pares encontrados.",meaning:"Energia e trabalho em equipe: quando todos se ajudam, o ritmo melhora e as conquistas crescem."},
+    {icon:"⏰",name:"+12 segundos",owner:"Seu Arnaldo",effect:"Acrescenta até 12 segundos ao tempo restante, respeitando o limite inicial da fase.",meaning:"Solidariedade e experiência: uma ajuda na hora certa pode fazer toda a diferença."}
+  ];
+
+  const castHtml=characters.map(character=>`
+    <article class="comic-character-card">
+      <div class="comic-character-avatar" aria-hidden="true">${character.icon}</div>
+      <div>
+        <h4>${escapeHtml(character.name)}</h4>
+        <span class="comic-character-role">${escapeHtml(character.role)}</span>
+        <p>${escapeHtml(character.text)}</p>
+      </div>
+    </article>`).join("");
+
+  const powersHtml=powers.map(power=>`
+    <article class="power-origin-card">
+      <div class="power-origin-icon" aria-hidden="true">${power.icon}</div>
+      <div>
+        <div class="power-owner">${escapeHtml(power.owner)}</div>
+        <h4>${escapeHtml(power.name)}</h4>
+        <p><strong>Na missão:</strong> ${escapeHtml(power.effect)}</p>
+        <p><strong>O que representa:</strong> ${escapeHtml(power.meaning)}</p>
+      </div>
+    </article>`).join("");
+
+  const unlockedCount=LV.reduce((count,_,i)=>count+(isCompleted(i)?1:0),0);
+  const pages=LV.map((level,i)=>{
+    const unlocked=isCompleted(i);
+    if(!unlocked){
+      return `<article class="comic-page locked">
+        <h3>🔒 Capítulo ${i+1}: ${escapeHtml(level.n)}</h3>
+        <div class="comic-lock-content">
+          <span class="comic-lock-icon" aria-hidden="true">📖🔒</span>
+          <b>Este capítulo ainda está bloqueado</b>
+          <p>Conclua a Fase ${i+1} — ${escapeHtml(level.n)} para liberar esta parte da história.</p>
+        </div>
+      </article>`;
+    }
+
+    const character=CH[CAST[i]]||["📦","Contadinho"];
+    const panels=[
+      {speaker:"Contadinho",text:level.intro[0]},
+      {speaker:character[0]+" "+character[1],text:level.intro[1]+" "+CL[i]},
+      {speaker:"Contadinho",text:level.outro[0]}
+    ];
+
+    return `<article class="comic-page">
+      <h3>Capítulo ${i+1}: ${escapeHtml(level.n)} <span class="comic-speaker">✅ Liberado</span></h3>
+      <div class="comic-feature">
+        <div class="comic-art-frame">
+          <img src="${IM[level.sp]}" alt="Contadinho — ${escapeHtml(level.n)}" loading="lazy">
+        </div>
+        <div class="comic-bubble">
+          <b>📦 A aventura continua...</b>
+          <p>${escapeHtml(level.intro[0])}</p>
+        </div>
+      </div>
+      <div class="comic-panels">
+        ${panels.map((panel,index)=>`
+          <section class="comic-panel">
+            <b>QUADRINHO ${index+1}</b>
+            <span class="comic-speaker">${escapeHtml(panel.speaker)}</span>
+            <p>${escapeHtml(panel.text)}</p>
+          </section>`).join("")}
+      </div>
+    </article>`;
+  }).join("");
+
+  container.innerHTML=`
+    <div class="comic-progress">📚 ${unlockedCount} de ${LV.length} capítulos da aventura liberados</div>
+
+    <section class="comic-section" aria-labelledby="comicCastTitle">
+      <h3 class="comic-section-title" id="comicCastTitle">🎭 Conheça os personagens</h3>
+      <p class="comic-section-intro">Toda boa missão precisa de uma equipe. Conheça quem acompanha Contadinho — e até quem tenta atrapalhar o inventário!</p>
+      <div class="comic-cast-grid">${castHtml}</div>
+    </section>
+
+    <section class="comic-section" aria-labelledby="comicPowersTitle">
+      <h3 class="comic-section-title" id="comicPowersTitle">✨ A origem dos poderes</h3>
+      <div class="power-origin-intro">
+        <strong>Uma equipe, seis grandes ajudas</strong><br>
+        Na primeira grande contagem, Contadinho olhou para tantas caixas que ficou sem saber por onde começar. “Eu não vou conseguir sozinho”, confessou. Foi então que seus amigos compartilharam aquilo que cada um tinha de melhor: atenção, calma, intuição, proteção, energia e solidariedade. Não era magia: eram qualidades da equipe transformadas em poderes para ajudar na missão.
+      </div>
+      <div class="power-origin-grid">${powersHtml}</div>
+      <p class="power-origin-ending">📦 Contadinho entendeu a lição: o maior poder não está em um botão. Está em observar com atenção, manter a calma, confiar nos colegas e trabalhar em equipe. Cada habilidade ajuda de um jeito — e juntas elas tornam a missão possível!</p>
+    </section>
+
+    <section class="comic-section" aria-labelledby="comicChaptersTitle">
+      <h3 class="comic-section-title" id="comicChaptersTitle">📖 Capítulos da aventura</h3>
+      <p class="comic-section-intro">Os capítulos são liberados conforme você conclui as fases do jogo.</p>
+      <div class="comic-book">${pages}</div>
+    </section>`;
 }
 
-function startGame(i){stop();const l=LV[i],ids=shuffle([...Array(14).keys()]).slice(0,l.p),cards=shuffle(ids.concat(ids)),tot=l.p*10+15,pu={};for(const k in PW)pu[k]=PW[k][2];
- G={i,cards,first:null,lock:true,moves:0,errs:0,combo:0,best:0,score:0,left:tot,tot,frozen:0,pu,used:0,shield:0,turbo:0,bag:i>=2?15+Math.random()*6:1e9,bags:0,done:0,tk:null};
- document.body.style.setProperty("--glow",`hsla(${(i*47+25)%360},90%,58%,.3)`);
- $("#gTitle").textContent=`Fase ${i+1}: ${l.n}`;$("#gMoves").textContent="0 jogadas";$("#gScore").textContent="0 pts";$("#gCombo").classList.remove("on");
- mood(l.sp,"Memorize as cartas!");
- const b=$("#board");b.innerHTML=cards.map((id,k)=>`<button class="card" data-k="${k}" aria-label="Carta ${k+1}"><span class="in"><span class="f bk"><em>S</em></span><span class="f fr">${img(id)}</span></span></button>`).join("");
- b.querySelectorAll(".card").forEach(el=>el.onclick=()=>flip(el));
- pw();bar();show("game");fit();
- const els=[...b.children];setTimeout(()=>{els.forEach(e=>e.classList.add("up"));setTimeout(()=>{els.forEach(e=>e.classList.remove("up"));G&&(G.lock=false,G.tk=setInterval(tick,100));mood(l.sp,"Valendo! Encontre os pares.")},900+l.p*170)},350)}
+
+const PW={peek:["👀","Espiar",1],freeze:["❄️","Congelar",1],hint:["🧲","Ímã da Celine",1],shield:["🛡️","Escudo",1],turbo:["🚀","Turbo",1],time:["⏰","+12 s",1]};
+
+
+
+function stop(){if(G){clearInterval(G.tk);G=null}}
+
+
+
+function shuffle(a){
+
+  const arr = [...a];
+
+  for(let i=arr.length-1;i>0;i--){
+
+    const j=Math.floor(Math.random()*(i+1));
+
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+
+  }
+
+  return arr;
+
+}
+
+
+
+function spawnEmojis(el) {
+
+  const emojis = ["🎉", "⭐", "📦", "🎈", "✨", "👍", "🔥", "💎"];
+
+  const rect = el.getBoundingClientRect();
+
+  for (let i = 0; i < 6; i++) {
+
+    const span = document.createElement("span");
+
+    span.className = "floating-emoji";
+
+    span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+    span.style.left = (rect.left + rect.width / 2 - 16 + (Math.random() - 0.5) * 40) + "px";
+
+    span.style.top = (rect.top + rect.height / 2 - 16) + "px";
+
+    span.style.animationDelay = (i * 0.08) + "s";
+
+    span.style.fontSize = (1.5 + Math.random()) + "rem";
+
+    document.body.appendChild(span);
+
+    setTimeout(() => span.remove(), 1500);
+
+  }
+
+}
+
+
+
+function timeLimitForStage(i){
+
+  const pairs=LV[i].p;
+
+  return Math.round(30+pairs*7+Math.pow(pairs,1.35)*1.2+i*2);
+
+}
+
+
+
+function startGame(i){
+
+  if(isStageBlocked(i)){toast("🔒 A Fase 1 só pode ser jogada uma vez.");return}
+
+  if(isCompleted(i)){toast("✅ Esta fase já foi concluída.");return}
+
+  stop();
+
+
+
+  // Marcar fase jogada para impedir reinício se for a fase 0 (Fase 1)
+
+  if(i === 0){
+
+    S.playedStages[0] = true;
+
+    const p = progress();
+
+    p.playedStages = p.playedStages || [];
+
+    p.playedStages[0] = true;
+
+    save();
+
+  }
+
+
+
+  const l=LV[i];
+
+  const selectedIds = shuffle([...Array(IM.length).keys()]).slice(0, l.p);
+
+  const cards = shuffle(selectedIds.concat(selectedIds));
+
+
+
+  const tot=timeLimitForStage(i),pu={},playerProgress=progress();
+  for(const k in PW)pu[k]=playerProgress.usedPowers.includes(k)?0:1;
+
+
+
+  G={i,cards,first:null,lock:true,moves:0,errs:0,combo:0,best:0,score:0,left:tot,tot,frozen:0,pu,used:0,shield:0,turbo:0,bag:i>=2?15+Math.random()*6:1e9,bags:0,done:0,tk:null};
+
+  document.body.style.setProperty("--glow",`hsla(${(i*47+25)%360},90%,58%,.3)`);
+
+  $("#gTitle").textContent=`Fase ${i+1}: ${l.n}`;
+
+  $("#gMoves").textContent="0 jogadas";$("#gScore").textContent="0 pts";$("#gCombo").classList.remove("on");
+
+  mood(l.sp,"Valendo! Encontre os pares.");
+
+
+
+  const b=$("#board");
+
+  b.innerHTML=cards.map((id,k)=>`<button class="card" data-k="${k}" aria-label="Carta ${k+1}"><span class="in"><span class="f bk"><em>S</em></span><span class="f fr">${cardFace(id)}</span></span></button>`).join("");
+
+  b.querySelectorAll(".card").forEach(el=>el.onclick=()=>flip(el));
+
+
+
+  pw();bar();show("game");fit();
+
+  G.lock=false;G.tk=setInterval(tick,100);
+
+}
+
+
+
 function fit(){if(!G)return;const n=G.cards.length,W=Math.min(innerWidth,980)-24,b=$("#board"),top=b.getBoundingClientRect().top+scrollY,H=Math.max(innerHeight-top-110,240);let bc=3,bs=0;for(let c=3;c<=8;c++){const r=Math.ceil(n/c),s=Math.min(W/c-8,130,(H/r-8)/1.08);if(s>bs){bs=s;bc=c}}bs=Math.max(bs,54);b.style.setProperty("--c",bc);b.style.setProperty("--w",bc*(bs+8)+"px")}
+
+
+
 function mood(i,c){$("#masImg").src=IM[i];$("#masImg").alt=NAMES[i];$("#masImg").style.animation="none";void $("#masImg").offsetWidth;$("#masImg").style.animation="";$("#gCap").textContent=c}
+
+
+
 const say2=t=>$("#gCap").textContent=t;
-function pw(){$("#pw").innerHTML=Object.keys(PW).map(k=>`<button class="pbtn" data-p="${k}" ${G.pu[k]?"":"disabled"} aria-label="${PW[k][1]}"><span>${PW[k][0]}</span><small>${PW[k][1]}</small><b>${G.pu[k]}</b></button>`).join("")}
+
+
+
+function pw(){$("#pw").innerHTML=Object.keys(PW).map(k=>`<button class="pbtn" data-p="${k}" ${G.pu[k]?"":"disabled"} aria-label="${PW[k][1]} — ${G.pu[k]?"disponível":"já utilizado nesta campanha"}"><span>${PW[k][0]}</span><small>${PW[k][1]}</small><b>${G.pu[k]?"1x":"USADO"}</b></button>`).join("")}
+
+
+
 $("#pw").onclick=e=>{const b=e.target.closest("[data-p]");b&&power(b.dataset.p)};
+
+
+
 function bar(){const r=Math.max(0,G.left/G.tot);$("#barI").style.transform=`scaleX(${r})`;$("#bar").classList.toggle("low",r<.25);$("#bar").classList.toggle("ice",G.frozen>0)}
+
+
+
 function tick(){const g=G;if(!g)return;if(g.frozen>0)g.frozen-=.1;else{g.left-=.1;g.bag-=.1}bar();if(g.bag<=0){g.bag=16+Math.random()*8;bagunca()}if(g.left<=0)lose()}
-function bagunca(){const g=G;if(!g||g.lock)return;const e=[...$("#board").children].filter(x=>!/up|ok/.test(x.className));if(e.length<3)return;g.bags++;say2("👾 Bagunça: hihi, embaralhei tudo!");const ks=e.map(x=>+x.dataset.k),ids=shuffle(ks.map(k=>g.cards[k]));ks.forEach((k,j)=>{g.cards[k]=ids[j];e[j].querySelector(".fr").innerHTML=img(ids[j])});e.forEach(x=>x.classList.add("mix"));beep(200,.3,"sawtooth");setTimeout(()=>e.forEach(x=>x.classList.remove("mix")),700)}
-function power(k){const g=G;if(!g||g.lock||!g.pu[k])return;g.pu[k]--;g.used++;S.pu++;if(S.pu>=10)award("pow5");save();
+
+
+
+function bagunca(){const g=G;if(!g||g.lock)return;const e=[...$("#board").children].filter(x=>!/up|ok/.test(x.className));if(e.length<3)return;g.bags++;say2("👾 SAP: hihi, embaralhei tudo!");const ks=e.map(x=>+x.dataset.k),ids=shuffle(ks.map(k=>g.cards[k]));ks.forEach((k,j)=>{g.cards[k]=ids[j];e[j].querySelector(".fr").innerHTML=cardFace(ids[j])});e.forEach(x=>x.classList.add("mix"));beep(200,.3,"sawtooth");setTimeout(()=>e.forEach(x=>x.classList.remove("mix")),700)}
+
+
+
+function power(k){
+  const g=G;
+  if(!g||g.lock||!g.pu[k])return;
+  const p=progress();
+  if(p.usedPowers.includes(k)){
+    g.pu[k]=0;
+    pw();
+    toast("🧰 Este poder já foi utilizado nesta campanha.");
+    return;
+  }
+  p.usedPowers.push(k);
+  g.pu[k]=0;
+  g.used++;
+  S.pu=(Number(S.pu)||0)+1;
+  if(p.usedPowers.length===Object.keys(PW).length)award("pow5");
+  save();
+
  if(k==="peek"){g.lock=true;const e=[...$("#board").children].filter(x=>!/up|ok/.test(x.className));e.forEach(x=>x.classList.add("up"));setTimeout(()=>{e.forEach(x=>x.classList.remove("up"));if(G===g)g.lock=false},1300);say2("🤖 Scan: bip! Memorize rápido!")}
+
  else if(k==="freeze"){g.frozen=8;say2("❄️ Tempo congelado por 8 segundos!")}
- else if(k==="time"){g.left=Math.min(g.tot,g.left+12);say2("⏰ Seu Zé: mais 12 segundos!")}
+
+ else if(k==="time"){g.left=Math.min(g.tot,g.left+12);say2("⏰ Seu Arnaldo: mais 12 segundos!")}
+
  else if(k==="shield"){g.shield=1;say2("🛡️ Escudo ativo: o próximo erro não conta!")}
+
  else if(k==="turbo"){g.turbo=3;say2("🚀 Turbo! Os próximos 3 pares valem o dobro!")}
- else if(k==="hint"){const un=[...$("#board").children].filter(x=>!x.classList.contains("ok")),a=un[0],id=g.cards[+a.dataset.k],b=un.find(x=>x!==a&&g.cards[+x.dataset.k]===id);if(g.first){g.first.classList.remove("up");g.first=null}g.lock=true;a.classList.add("up");b.classList.add("up");award("mimi");say2("🐱 Mimi: miau! Achei um par!");setTimeout(()=>{if(G===g)hit(g,a,b,true)},500)}
+
+ else if(k==="hint"){const un=[...$("#board").children].filter(x=>!x.classList.contains("ok")),a=un[0],id=g.cards[+a.dataset.k],b=un.find(x=>x!==a&&g.cards[+x.dataset.k]===id);if(g.first){g.first.classList.remove("up");g.first=null}g.lock=true;a.classList.add("up");b.classList.add("up");award("mimi");say2("🐱 Celine: miau! Achei um par!");setTimeout(()=>{if(G===g)hit(g,a,b,true)},500)}
+
  pw();bar();sfx.ok()}
+
+
+
 async function flip(el){const g=G;if(!g||g.lock||el.classList.contains("up")||el.classList.contains("ok"))return;el.classList.add("up");sfx.flip();
+
  if(!g.first){g.first=el;return}
+
  const a=g.first,b=el;g.first=null;g.lock=true;g.moves++;$("#gMoves").textContent=g.moves+" jogadas";
+
  if(g.cards[+a.dataset.k]===g.cards[+b.dataset.k]){await wait(380);if(G===g)hit(g,a,b)}
+
  else{await wait(650);if(G!==g)return;[a,b].forEach(x=>x.classList.add("no"));$("#board").classList.add("shk");sfx.no();
-  if(g.shield){g.shield=0;award("shield");say2("🛡️ O escudo te salvou!")}else{g.errs++;g.combo=0;$("#gCombo").classList.remove("on");mood(11,"Foco, atenção!")}
-  await wait(350);if(G!==g)return;$("#board").classList.remove("shk");[a,b].forEach(x=>x.classList.remove("up","no"));g.lock=false}}
+
+ toast("<span>⚠️</span><div><b>Cuidado com a UPM!</b></div>");
+
+  if(g.shield){g.shield=0;award("shield");say2("🛡️ O escudo te salvou! Cuidado com a UPM!")}else{g.errs++;g.combo=0;$("#gCombo").classList.remove("on");mood(11,"Cuidado com a UPM! Atenção na próxima escolha.")}
+
+ await wait(350);if(G!==g)return;$("#board").classList.remove("shk");[a,b].forEach(x=>x.classList.remove("up","no"));g.lock=false}}
+
+
+
 function hit(g,a,b,auto){[a,b].forEach(x=>{x.classList.remove("up");x.classList.add("ok")});sfx.ok();
-  
-  // Solta os emojis na tela ao acertar
-  spawnEmojis(a);
-  
-  if(!auto){g.combo++;g.best=Math.max(g.best,g.combo)}
+
+ spawnEmojis(a);
+
+ if(!auto){g.combo++;g.best=Math.max(g.best,g.combo)}
+
  let pts=100*Math.min(g.combo||1,5);if(g.turbo>0){pts*=2;g.turbo--;award("turbo")}g.score+=pts;g.done++;
+
  const pp=document.createElement("i");pp.className="pp";pp.textContent="+"+pts;a.appendChild(pp);setTimeout(()=>pp.remove(),900);
+
  $("#gScore").textContent=g.score+" pts";const cb=$("#gCombo");cb.classList.toggle("on",g.combo>1);cb.textContent="🔥 Combo x"+g.combo;
+
  const id=g.cards[+a.dataset.k];mood(id,NAMES[id]);if(!S.stk.includes(id)){S.stk.push(id);if(S.stk.length===14)award("coll")}
+
  award("first");if(g.combo>=3)award("c3");if(g.combo>=5)award("c5");if(g.combo>=8)award("c8");
- if(!auto&&g.combo===4){const k=Object.keys(PW)[Math.random()*6|0];g.pu[k]++;pw();toast(`<span>${PW[k][0]}</span><div><b>Bônus de combo: +1 ${PW[k][1]}</b></div>`)}
+
+
  save();g.lock=false;if(g.done===LV[g.i].p)win()}
-function win(){const g=G,l=LV[g.i];stop();g.lock=true;sfx.win();confetti();
- const bonus=Math.ceil(g.left)*5,total=g.score+bonus,p=l.p,st=g.moves<=p*1.7?3:g.moves<=p*2.6?2:1;
- S.tot+=total;S.wins++;S.stars[g.i]=Math.max(S.stars[g.i]||0,st);S.un=Math.max(S.un,Math.min(g.i+2,LV.length));
- if(st===3)award("s3");if(g.errs===0&&g.i>=1)award("perf");if(g.left>g.tot/2)award("fast");if(!g.used&&g.i>=3)award("pure");if(g.bags)award("bag");if(S.tot>=5000)award("rich");if(S.wins>=15)award("marathon");if(g.i===0&&g.tot-g.left<20)award("speed");if(LV.every((_,k)=>S.stars[k]===3))award("gold");
- S.lost=false;save();const last=g.i===LV.length-1;
- setTimeout(()=>{$("#resBox").innerHTML=`${img(13,"Missão cumprida")}<h2>Fase concluída!</h2><div class="stars">${"★".repeat(st)}<s>${"★".repeat(3-st)}</s></div><p class="sc">${g.moves} jogadas · ${g.errs} erros · melhor combo x${g.best}<br>${g.score} pts + ${bonus} de bônus = <b>${total} pts</b></p><div class="row"><button class="btn ghost" id="rRe">Repetir</button><button class="btn" id="rNx">${last?"Ver o final":"Continuar a história"}</button></div>`;$("#res").classList.add("on");$("#rNx").focus();
-  $("#rRe").onclick=()=>{$("#res").classList.remove("on");startGame(g.i)};
-  $("#rNx").onclick=()=>{$("#res").classList.remove("on");last?ending():startStory(g.i+1,l.outro)}},900)}
-function lose(){const g=G;stop();g.lock=true;sfx.lose();S.lost=true;save();$("#resBox").innerHTML=`${img(12,"Você consegue")}<h2>O tempo acabou!</h2><p class="sc">Você achou ${g.done} de ${LV[g.i].p} pares. Contadinho acredita em você!</p><div class="row"><button class="btn ghost" id="rMp">Fases</button><button class="btn" id="rRe">Tentar de novo</button></div>`;$("#res").classList.add("on");$("#rRe").focus();
- $("#rRe").onclick=()=>{$("#res").classList.remove("on");award("again");startGame(g.i)};$("#rMp").onclick=()=>{$("#res").classList.remove("on");show("map")}}
+
+
+
+function win(){
+
+  const g=G,l=LV[g.i];stop();g.lock=true;sfx.win();confetti();
+
+
+
+  // Junção da pontuação com o bônus de tempo restante
+
+  const bonusTime=Math.ceil(g.left)*10;
+
+  const total=g.score+bonusTime;
+
+  const pairs=l.p,st=g.moves<=pairs*1.7?3:g.moves<=pairs*2.6?2:1;
+
+
+
+  S.tot+=total;S.wins++;
+
+  const p=progress();p.stars=p.stars||[];p.completed=p.completed||[];p.won=p.won||[];
+
+  p.stars[g.i]=Math.max(p.stars[g.i]||0,st);p.completed[g.i]=true;p.won[g.i]=true;
+
+
+
+  // Só permite avançar na ordem
+
+  p.un=Math.max(p.un||1,Math.min(g.i+2,LV.length));
+
+
+
+  const elapsed=Math.max(1,Math.round(g.tot-g.left));
+
+  if(S.player){
+
+    const record={key:S.player.key,identifier:S.player.identifier||S.player.key.replace("_","-"),name:S.player.identifier||S.player.key.replace("_","-"),phase:g.i,seconds:elapsed,score:total,won:true};
+
+    const oldIndex=S.ranking.findIndex(r=>r.key===record.key&&r.phase===record.phase);
+
+    if(oldIndex<0)S.ranking.push(record);
+
+    else if(total > S.ranking[oldIndex].score) S.ranking[oldIndex]=record;
+
+  }
+
+
+
+  if(st===3)award("s3");if(g.errs===0&&g.i>=1)award("perf");if(g.left>g.tot/2)award("fast");if(!g.used&&g.i>=3)award("pure");if(g.bags)award("bag");if(S.tot>=5000)award("rich");if(S.wins>=15)award("marathon");if(g.i===0&&g.tot-g.left<20)award("speed");if(LV.every((_,k)=>p.stars[k]===3))award("gold");
+
+  S.lost=false;save();const last=g.i===LV.length-1;
+
+  setTimeout(()=>{
+
+    $("#resBox").innerHTML=`${img(13,"Missão cumprida")}<h2>Fase concluída!</h2><div class="stars">${"★".repeat(st)}<s>${"★".repeat(3-st)}</s></div><p class="sc">${g.moves} jogadas · ${g.errs} erros · combo x${g.best}<br>Tempo gasto: <b>${formatTime(elapsed)}</b><br>Pontos nas cartas: ${g.score} + Bônus Tempo: ${bonusTime} = <b>${total} pts Totais</b></p><div class="row"><button class="btn" id="rNx">${last?"Ver o final":"Continuar a história"}</button><button class="btn alt" id="rRank">🏆 Ranking</button></div>`;
+
+    $("#res").classList.add("on");$("#rNx").focus();
+
+    $("#rNx").onclick=()=>{$("#res").classList.remove("on");last?ending():startStory(g.i+1,l.outro)};
+
+    $("#rRank").onclick=()=>{$("#res").classList.remove("on");openPanel("ranking")};
+
+  },900);
+
+}
+
+
+
+function lose(){
+  const g=G;
+  stop();
+  g.lock=true;
+  sfx.lose();
+  S.lost=true;
+
+  // Mesmo sem encontrar pares, a fase é encerrada e a campanha avança.
+  const p=progress();
+  p.completed=p.completed||[];
+  p.won=p.won||[];
+  p.completed[g.i]=true;
+  p.won[g.i]=false;
+  p.un=Math.max(p.un||1,Math.min(g.i+2,LV.length));
+  if(g.i===0){
+    p.playedStages=p.playedStages||[];
+    p.playedStages[0]=true;
+    S.playedStages[0]=true;
+  }
+
+  const elapsed=Math.max(1,Math.round(g.tot-g.left));
+  // Pontos dos pares encontrados são mantidos, mas não há bônus de tempo na derrota.
+  S.tot=(Number(S.tot)||0)+g.score;
+  if(S.player){
+    const record={
+      key:S.player.key,
+      identifier:S.player.identifier||S.player.key.replace("_","-"),
+      name:S.player.identifier||S.player.key.replace("_","-"),
+      phase:g.i,
+      seconds:elapsed,
+      score:g.score,
+      won:false
+    };
+    const oldIndex=S.ranking.findIndex(r=>r.key===record.key&&r.phase===record.phase);
+    if(oldIndex<0)S.ranking.push(record);
+    else S.ranking[oldIndex]=record;
+  }
+
+  award("advance");
+  if(S.tot>=5000)award("rich");
+  save();
+
+  const nextAvailable=g.i+1<LV.length;
+  const nextLabel=nextAvailable?`Ir para Fase ${g.i+2}`:"Ver o final";
+  const summary=g.done===0
+    ? "O tempo acabou antes de encontrar um par. Sua jornada continua mesmo assim!"
+    : `Você encontrou ${g.done} de ${LV[g.i].p} pares e marcou ${g.score} pontos. Sua jornada continua!`;
+
+  $("#resBox").innerHTML=`${img(12,"Você consegue")}<h2>O tempo acabou!</h2><p class="sc">${summary}</p><p class="sc">Esta fase foi encerrada e não poderá ser repetida. Os poderes usados continuam indisponíveis nas próximas fases.</p><div class="row"><button class="btn" id="rContinue">${nextLabel}</button><button class="btn alt" id="rRank">🏆 Ranking</button></div>`;
+  $("#res").classList.add("on");
+  $("#rContinue").focus();
+
+  $("#rContinue").onclick=()=>{
+    $("#res").classList.remove("on");
+    if(nextAvailable)startStory(g.i+1,LV[g.i].outro);
+    else ending();
+  };
+  $("#rRank").onclick=()=>{
+    $("#res").classList.remove("on");
+    openPanel("ranking");
+  };
+}
+
+
 function ending(){lines=LV[6].outro.concat(["O inventário foi um sucesso. Contadinho pendura o boné no gancho, olha o depósito organizado e sorri.","Amanhã tem mais caixas, mais amigos e mais histórias. Mas hoje, a missão foi cumprida!"]);li=0;after=()=>{award("end");save();$("#resBox").innerHTML=`${img(13,"Missão cumprida")}<h2>Fim da história!</h2><p class="sc">Pontuação total: <b>${S.tot}</b><br>Adesivos: ${S.stk.length}/14 · Conquistas: ${S.ach.length}/${ACH.length}</p><div class="row"><button class="btn ghost" id="eAl">Ver álbum</button><button class="btn" id="eHm">Início</button></div>`;$("#res").classList.add("on");confetti();sfx.win();$("#eHm").onclick=()=>{$("#res").classList.remove("on");show("home")};$("#eAl").onclick=()=>{$("#res").classList.remove("on");show("home");openPanel("album")}};after.label="Fim";$("#stTag").textContent="Epílogo";$("#stTitle").textContent="Missão cumprida";$("#stImg").src=IM[13];$("#stCast").textContent="🎉 Todo mundo da empresa";show("story");say()}
+
+
 
 const bgm=$("#bgm");bgm.volume=.5;
 
+
+
 function musUp(){$("#mus").textContent="🎵 Música: "+(S.mus?"ligada":"desligada");$("#mus2").textContent=S.mus?"🎵":"🔇";
+
   if(S.mus) {
+
     bgm.play().catch(()=>{});
+
   } else {
+
     bgm.pause();
+
   }
+
 }
 
-["mus","mus2"].forEach(id=>$("#"+id).onclick=()=>{S.mus=!S.mus;save();musUp()});
-$("#vol").oninput=e=>bgm.volume=+e.target.value;
-$("#mfile").onchange=e=>{const f=e.target.files[0];if(f){bgm.src=URL.createObjectURL(f);S.mus=true;musUp()}};
 
-// Tenta iniciar a música assim que o DOM carregar
+
+["mus","mus2"].forEach(id=>$("#"+id).onclick=()=>{S.mus=!S.mus;save();musUp()});
+
+$("#vol").oninput=e=>bgm.volume=+e.target.value;
+
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
+
   musUp();
-  // Tenta dar play imediatamente
+
   bgm.play().catch(()=>{});
+
 });
 
-// Força o play no primeiro clique/toque do usuário (Restrição de navegadores)
+
+
 addEventListener("pointerdown",()=>{
+
   if(S.mus&&bgm.paused)bgm.play().catch(()=>{});
+
 }, {once: true});
 
+
+
 document.addEventListener("visibilitychange",()=>{if(document.hidden)bgm.pause();else if(S.mus)bgm.play().catch(()=>{})});
+
 addEventListener("resize",fit);addEventListener("orientationchange",()=>setTimeout(fit,200));
+
 </script>
+
 </body>
+
 </html>
